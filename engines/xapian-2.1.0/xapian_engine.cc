@@ -58,13 +58,13 @@ int index(const std::string& dir) {
 	return 0;
 }
 
-// Query syntax: words are optional (OR), +word is required, "a b" is a phrase.
+// Query syntax: words are optional (OR), +word is required, -word is excluded, "a b" is a phrase.
 Xapian::Query parse(std::string_view q) {
-	std::vector<Xapian::Query> must, should;
+	std::vector<Xapian::Query> must, should, must_not;
 	for (std::size_t i = 0; i < q.size();) {
 		if (q[i] == ' ') { ++i; continue; }
-		bool required = q[i] == '+';
-		if (required) ++i;
+		bool required = q[i] == '+', excluded = q[i] == '-';
+		if (required || excluded) ++i;
 		Xapian::Query clause;
 		if (q[i] == '"') {
 			auto end = q.find('"', i + 1);
@@ -84,12 +84,16 @@ Xapian::Query parse(std::string_view q) {
 			clause = Xapian::Query(std::string(q.substr(i, end - i)));
 			i = end;
 		}
-		(required ? must : should).push_back(clause);
+		(excluded ? must_not : required ? must : should).push_back(clause);
 	}
 	Xapian::Query any(Xapian::Query::OP_OR, should.begin(), should.end());
-	if (must.empty()) return any;
-	Xapian::Query all(Xapian::Query::OP_AND, must.begin(), must.end());
-	return should.empty() ? all : Xapian::Query(Xapian::Query::OP_AND_MAYBE, all, any);
+	Xapian::Query result = any;
+	if (!must.empty()) {
+		Xapian::Query all(Xapian::Query::OP_AND, must.begin(), must.end());
+		result = should.empty() ? all : Xapian::Query(Xapian::Query::OP_AND_MAYBE, all, any);
+	}
+	if (must_not.empty()) return result;
+	return Xapian::Query(Xapian::Query::OP_AND_NOT, result, Xapian::Query(Xapian::Query::OP_OR, must_not.begin(), must_not.end()));
 }
 
 int serve(const std::string& dir) {
