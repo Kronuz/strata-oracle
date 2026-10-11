@@ -1,0 +1,8 @@
+[
+  "Written in C++.",
+  "Xapian 2.1.0, glass backend, compacted into one database after indexing.",
+  "Index is read from disk via pread through the page cache.",
+  "Single indexing thread (WritableDatabase has one writer).",
+  "BM25 with Xapian's defaults (k1=1, k2=0, k3=1, b=0.5, min_normlen=0.5).",
+  "Counts use check_at_least = doccount, so they are exact."
+]
