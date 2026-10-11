@@ -1,0 +1,14 @@
+The quick brown fox jumps over the lazy dog.
+Running runners ran; the runner's run was run-of-the-mill.
+Don't stop believin' — it's O'Brien's 1990s-era café, naïve résumé.
+E-mail me at someone@example.com or visit https://example.org/path?q=1&r=2.
+C++ and C# are languages; so is F*, R, and .NET 4.5.2.
+Numbers: 3.14159, 1,000,000, -42, +7, 1e10, 0x1F, 2nd, 21st.
+UPPER lower MiXeD CaSe Title Case.
+Hyphenated-words and under_scores and dot.separated.tokens and slash/separated.
+Unicode: Straße, ÆØÅ, Ελληνικά, русский язык, עברית, العربية.
+中文分词测试，日本語のテキスト、한국어 텍스트.
+Emoji 😀 and symbols © ® ™ € £ ¥ § ¶ •.
+   leading and trailing spaces   
+A single word
+apostrophes: rock'n'roll, ma'am, 'quoted', "double quoted"

@@ -1,0 +1,22 @@
+barack obama
+"barack obama"
++barack +obama
+barack -obama
+barack AND obama
+barack OR obama
+barack NOT obama
+barack XOR obama
+(barack OR michelle) AND obama
+barack NEAR obama
+barack ADJ obama
+obam*
+ob?ma
+obama~2
+running runners
+"running runners"
+title:obama
+NOT obama
+Barack Obama's
+café naïve
+中文分词
+1990s-era

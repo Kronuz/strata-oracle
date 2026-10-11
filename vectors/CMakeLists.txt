@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.14)
+project(strata_oracle LANGUAGES CXX)
+# GPL: links Xapian. Never part of strata.
+set(XAPIAN_PREFIX "$ENV{HOME}/opt/xapian-2.1.0" CACHE PATH "Xapian install prefix")
+add_executable(oracle oracle.cc)
+target_compile_features(oracle PRIVATE cxx_std_20)
+target_include_directories(oracle PRIVATE ${XAPIAN_PREFIX}/include)
+target_link_directories(oracle PRIVATE ${XAPIAN_PREFIX}/lib)
+target_link_libraries(oracle PRIVATE xapian)
+set_target_properties(oracle PROPERTIES BUILD_RPATH ${XAPIAN_PREFIX}/lib)
