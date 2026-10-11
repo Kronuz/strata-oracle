@@ -31,7 +31,7 @@ int index(const std::string& dir) {
 	// Builds into DIR.build, then compacts into DIR (a single merged database, like the other engines).
 	Xapian::WritableDatabase db(dir + ".build", Xapian::DB_CREATE_OR_OVERWRITE);
 	std::string line;
-	std::uint64_t n = 0;
+	std::uint64_t n = 0, skipped = 0;
 	while (std::getline(std::cin, line)) {
 		if (line.empty()) continue;
 		Xapian::Document doc;
@@ -40,7 +40,8 @@ int index(const std::string& dir) {
 		for (std::size_t i = 0; i < text.size();) {
 			auto j = text.find(' ', i);
 			if (j == std::string_view::npos) j = text.size();
-			if (j > i) doc.add_posting(std::string(text.substr(i, j - i)), ++pos);
+			// Xapian rejects terms over 245 bytes; Lucene and Tantivy drop such tokens too.
+			if (j - i > 245) { ++skipped; } else if (j > i) { doc.add_posting(std::string(text.substr(i, j - i)), ++pos); }
 			i = j + 1;
 		}
 		std::uint64_t sort = 0;
@@ -52,6 +53,7 @@ int index(const std::string& dir) {
 		if (++n % 100000 == 0) std::cerr << n << '\n';
 	}
 	db.commit();
+	std::cerr << "skipped " << skipped << " terms over 245 bytes\n";
 	db.compact(dir);
 	return 0;
 }
