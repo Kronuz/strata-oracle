@@ -80,6 +80,7 @@ int termgen_xapiand(const char* path) {
 		bool positions;
 		Xapian::TermGenerator::stop_strategy stop;
 		Xapian::TermGenerator::stem_strategy stem;
+		bool stemmer = true;
 	};
 	const config configs[] = {
 		{"prefix", "XA", 1, true, Xapian::TermGenerator::STOP_NONE, Xapian::TermGenerator::STEM_NONE},
@@ -88,14 +89,23 @@ int termgen_xapiand(const char* path) {
 		{"stop_all", "", 1, true, Xapian::TermGenerator::STOP_ALL, Xapian::TermGenerator::STEM_SOME},
 		{"stop_stemmed", "", 1, true, Xapian::TermGenerator::STOP_STEMMED, Xapian::TermGenerator::STEM_SOME},
 		{"stop_none_stopper", "", 1, true, Xapian::TermGenerator::STOP_NONE, Xapian::TermGenerator::STEM_SOME},
+		{"all_stop_stemmed", "", 1, true, Xapian::TermGenerator::STOP_STEMMED, Xapian::TermGenerator::STEM_ALL},
+		{"all_stop_all", "", 1, true, Xapian::TermGenerator::STOP_ALL, Xapian::TermGenerator::STEM_ALL},
+		{"all_z_stop_stemmed", "XC", 1, true, Xapian::TermGenerator::STOP_STEMMED, Xapian::TermGenerator::STEM_ALL_Z},
+		{"nostem_some", "", 1, true, Xapian::TermGenerator::STOP_STEMMED, Xapian::TermGenerator::STEM_SOME, false},
+		{"nostem_all", "", 1, true, Xapian::TermGenerator::STOP_STEMMED, Xapian::TermGenerator::STEM_ALL, false},
+		{"nostem_all_z", "", 1, true, Xapian::TermGenerator::STOP_ALL, Xapian::TermGenerator::STEM_ALL_Z, false},
+		{"defaults", "", 1, true, Xapian::TermGenerator::STOP_STEMMED, Xapian::TermGenerator::STEM_SOME, false},
 	};
 	for (const auto& text : lines(path)) {
 		for (const auto& c : configs) {
 			Xapian::TermGenerator g;
-			g.set_stemmer(Xapian::Stem("english"));
-			g.set_stemming_strategy(c.stem);
-			g.set_stopper(&stopper);
-			g.set_stopper_strategy(c.stop);
+			if (std::string(c.name) != "defaults") {
+				if (c.stemmer) { g.set_stemmer(Xapian::Stem("english")); }
+				g.set_stemming_strategy(c.stem);
+				g.set_stopper(&stopper);
+				g.set_stopper_strategy(c.stop);
+			}
 			Xapian::Document doc;
 			g.set_document(doc);
 			if (c.positions) {
@@ -104,7 +114,7 @@ int termgen_xapiand(const char* path) {
 				g.index_text_without_positions(text, c.wdf_inc, c.prefix);
 			}
 			std::cout << "{\"text\":" << json_string(text) << ",\"config\":\"" << c.name << "\",\"prefix\":" << json_string(c.prefix)
-			          << ",\"wdf_inc\":" << c.wdf_inc << ",\"positions\":" << (c.positions ? "true" : "false") << ",\"terms\":" << terms_json(doc) << "}\n";
+			          << ",\"stem\":" << c.stem << ",\"stop\":" << c.stop << ",\"stemmer\":" << (c.stemmer ? "true" : "false") << ",\"wdf_inc\":" << c.wdf_inc << ",\"positions\":" << (c.positions ? "true" : "false") << ",\"termpos\":" << g.get_termpos() << ",\"terms\":" << terms_json(doc) << "}\n";
 		}
 	}
 	return 0;
@@ -224,7 +234,7 @@ int termgen(const char* path) {
 				g.set_document(doc);
 				g.index_text(text);
 				std::cout << "{\"text\":" << json_string(text) << ",\"stem\":\"" << name << "\",\"cjk_ngram\":" << (cjk ? "true" : "false")
-				          << ",\"terms\":" << terms_json(doc) << "}\n";
+				          << ",\"termpos\":" << g.get_termpos() << ",\"terms\":" << terms_json(doc) << "}\n";
 			}
 		}
 	}
