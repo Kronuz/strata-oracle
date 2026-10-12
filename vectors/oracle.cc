@@ -3,9 +3,12 @@
 //
 //   oracle termgen  TEXTS_FILE             one text per line -> terms, wdf, positions per stem strategy
 //   oracle unicode                         every code point's category and lowercase mapping
+//   oracle chars                           how TermGenerator treats each code point, as ranges
+//   oracle infix                           non-word code points that do not just split words
 //   oracle termgen-xapiand TEXTS_FILE      prefixes, wdf increments, stoppers, positionless indexing
 //   oracle parse    QUERIES_FILE           one query per line -> descriptions per flag set
 //   oracle stem     LANGUAGE WORDS_FILE    one word per line -> stem
+//   oracle languages                       the stemmer languages, one per line
 //   oracle rank     CORPUS_JSON N QUERIES  index N docs, then top-10 weights, percents, estimates
 #include <xapian.h>
 
@@ -115,6 +118,93 @@ int unicode_table() {
 		const unsigned lower = Xapian::Unicode::tolower(cp);
 		if (category == int(Xapian::Unicode::UNASSIGNED) && lower == cp) { continue; }
 		std::cout << cp << ' ' << category << ' ' << lower << '\n';
+	}
+	return 0;
+}
+
+// Indexes each code point doubled ("cc") with FLAG_CJK_NGRAM: no terms means not a word
+// character, one term "cc" a word character, unigram plus bigram a CJK character. Prints
+// "first last class" ranges with class none, word, or cjk.
+int chars() {
+	const char* names[] = {"none", "word", "cjk", "other"};
+	int run_class = -1;
+	unsigned run_first = 0;
+	auto flush = [&](unsigned last) {
+		if (run_class >= 0) { std::cout << run_first << ' ' << last << ' ' << names[run_class] << '\n'; }
+	};
+	for (unsigned cp = 0; cp <= 0x10FFFF; ++cp) {
+		int cls;
+		if (cp >= 0xD800 && cp <= 0xDFFF) {
+			cls = 0;
+		} else {
+			std::string one, two;
+			Xapian::Unicode::append_utf8(one, cp);
+			two = one + one;
+			Xapian::TermGenerator g;
+			g.set_flags(Xapian::TermGenerator::FLAG_CJK_NGRAM);
+			Xapian::Document doc;
+			g.set_document(doc);
+			g.index_text(two);
+			const auto n = doc.termlist_count();
+			if (n == 0) {
+				cls = 0;
+			} else if (n == 1) {
+				cls = 1;
+			} else if (n == 2) {
+				cls = 2;
+			} else {
+				cls = 3;
+			}
+		}
+		if (cls != run_class) {
+			flush(cp - 1);
+			run_class = cls;
+			run_first = cp;
+		}
+	}
+	flush(0x10FFFF);
+	return 0;
+}
+
+std::string termset(const std::string& text) {
+	Xapian::TermGenerator g;
+	Xapian::Document doc;
+	g.set_document(doc);
+	g.index_text(text);
+	std::string out;
+	for (auto t = doc.termlist_begin(); t != doc.termlist_end(); ++t) { out += (out.empty() ? "" : " ") + *t; }
+	return out;
+}
+
+// For each non-word code point c: the terms of "LcR" for letter/digit contexts, of "Cc ",
+// "Cccc " and "Ccccc " (suffixes), and of "AcBc " (acronyms), printed when any of them
+// is not the plain split. Then, for each word character w, whether "w.w." is an acronym.
+int infix() {
+	const std::pair<std::string, std::string> contexts[] = {{"a", "b"}, {"1", "2"}, {"a", "1"}, {"1", "a"}, {"A", "B"}};
+	for (unsigned cp = 0; cp <= 0x10FFFF; ++cp) {
+		if (cp >= 0xD800 && cp <= 0xDFFF) { continue; }
+		std::string c;
+		Xapian::Unicode::append_utf8(c, cp);
+		if (!termset(c + c).empty()) { continue; }  // a word character
+		std::string line;
+		for (const auto& [l, r] : contexts) { line += " [" + termset(l + c + r) + "]"; }
+		for (int n : {1, 3, 4}) {
+			std::string w = "C";
+			for (int i = 0; i < n; ++i) { w += c; }
+			line += " [" + termset(w + " ") + "]";
+		}
+		line += " [" + termset("A" + c + "B" + c + " ") + "]";
+		const bool interesting = line != " [a b] [1 2] [1 a] [1 a] [a b] [c] [c] [c] [a b]";
+		if (interesting) { std::cout << "nonword " << cp << line << '\n'; }
+	}
+	for (unsigned cp = 0; cp <= 0x10FFFF; ++cp) {
+		if (cp >= 0xD800 && cp <= 0xDFFF) { continue; }
+		std::string c;
+		Xapian::Unicode::append_utf8(c, cp);
+		if (termset(c + c).empty()) { continue; }
+		std::string lower;
+		Xapian::Unicode::append_utf8(lower, Xapian::Unicode::tolower(cp));
+		if (termset(c + "." + c + ".") == lower + lower) { std::cout << "acronym " << cp << '\n'; }
 	}
 	return 0;
 }
@@ -234,9 +324,20 @@ int main(int argc, char** argv) {
 	std::string cmd = argc > 1 ? argv[1] : "";
 	if (cmd == "termgen" && argc == 3) { return termgen(argv[2]); }
 	if (cmd == "unicode" && argc == 2) { return unicode_table(); }
+	if (cmd == "chars" && argc == 2) { return chars(); }
+	if (cmd == "infix" && argc == 2) { return infix(); }
 	if (cmd == "termgen-xapiand" && argc == 3) { return termgen_xapiand(argv[2]); }
 	if (cmd == "parse" && argc == 3) { return parse(argv[2]); }
 	if (cmd == "stem" && argc == 4) { return stem(argv[2], argv[3]); }
+	if (cmd == "languages" && argc == 2) {
+		std::string all = Xapian::Stem::get_available_languages();
+		for (std::size_t i = 0, j; i < all.size(); i = j + 1) {
+			j = all.find(' ', i);
+			if (j == std::string::npos) { j = all.size(); }
+			std::cout << all.substr(i, j - i) << '\n';
+		}
+		return 0;
+	}
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
 	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | stem LANGUAGE WORDS | rank CORPUS N QUERIES\n";
 	return 2;

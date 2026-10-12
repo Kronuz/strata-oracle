@@ -20,3 +20,27 @@ the the the over and over and over again
 Running Runs RAN ran running runner; Ponies pony's ponies'
 foo--bar foo---bar --leading trailing-- a-b-c
 O'Neil's rock'n'roll can't won't y'all ’curly’ apostrophes
+rock’n’roll don’t ‛tis it‛s x''y a' 'a ' it's' don''t
+AT&T R&D a&b & x& &y 1&2 a&&b at&t's Q&A
+1.2.3 1..2 1.a a.1 1,2 1,,2 .5 5. 1.2. 3,4,5 ,6 1.2,3 1,2.3 a,b 1'000
+U.S.A U.S.A. u.s.a. U.s.A. A. A.B AB.CD I.B.M.'s X.Y.Z.123 U.S.-based A.b.C
+C++ C+++ C++++ C# C## F# a+b c+ +c x++y Ab++ 1++ C++11 c#.net Ç++ C+# C#+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb éééééééééééééééééééééééééééééééé èèèèèèèèèèèèèèèèèèèèèèèèèèèèèèèèè end
+été ́abc café ẍy
+١٢٣ ٣.١٤ ＡＢＣ１２３ ½ ² ③ Ⅻ
+_leading trailing_ __double__ a‿b ‿tie
+a‍b soft­hyphen zero​width
+ǅungla İstanbul ΣΑΣ ẞ
+abcабв 日本abc abc日本 日本123 カタカナー
+日 日本 日本語 日本語です 가 ㄱㅏ ｶﾀｶﾅ
+x‐y x‑y x–y x—y x·y x‧y x:y x/y x\y x@y x~y x^y x|y
+tab	here newline-free nbsp 　ideographic sep
+caf� na�ve �abc ab� � end
+a1.2 1a.2 1.2a x86.64 a1'b 1'2a a1&2 1a&b
+½.½ Ⅻ.Ⅻ ١'٢ ½'a a'½ ½&½ á'b 1́.2
+A.B.c A.Bc Ab.C. U.S.Army A.B.C A.1. Ç.Ñ. A.Ç. Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.Z.
+10cats ½cats ٣cats １cats Ⅻcats cats10
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa++ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa+ İİİİİİİİİİİİİİİİİİİİİİİİİİİİİİİİİ ẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞẞ A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A. A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A.A. end
+日本abc abc日本def 日本123 日a本 ภาษาไทย 日́本
+1​2 a​b C++'s C#'s AT&T++ x&y++ a'b+ C++­
+Cats DOGS The THE tHe running RUNNING
