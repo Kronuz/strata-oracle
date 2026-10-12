@@ -10,8 +10,10 @@
 //   oracle stem     LANGUAGE WORDS_FILE    one word per line -> stem
 //   oracle languages                       the stemmer languages, one per line
 //   oracle rank     CORPUS_JSON N QUERIES  index N docs, then top-10 weights, percents, estimates
+//   oracle termgen-bench CORPUS_JSON N     TermGenerator throughput into Xapian::Document
 #include <xapian.h>
 
+#include <chrono>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -328,6 +330,35 @@ int rank(const char* corpus, std::size_t n, const char* queries_path) {
 	return 0;
 }
 
+int termgen_bench(const char* corpus, std::size_t n) {
+	std::vector<std::string> docs;
+	std::size_t bytes = 0;
+	std::ifstream in(corpus);
+	for (std::string line; docs.size() < n && std::getline(in, line);) {
+		docs.push_back(text_field(line));
+		bytes += docs.back().size();
+	}
+	for (bool some : {false, true}) {
+		double best = 1e300;
+		std::size_t terms = 0;
+		for (int trial = 0; trial < 3; ++trial) {
+			terms = 0;
+			auto t0 = std::chrono::steady_clock::now();
+			for (const auto& d : docs) {
+				Xapian::TermGenerator g;
+				if (some) { g.set_stemmer(Xapian::Stem("english")); }
+				Xapian::Document doc;
+				g.set_document(doc);
+				g.index_text(d);
+				terms += doc.termlist_count();
+			}
+			best = std::min(best, std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
+		}
+		std::printf("%s: %zu docs, %.1f MB, %zu distinct terms per doc summed, %.1f MB/s\n", some ? "stem_some" : "stem_none", docs.size(), bytes / 1e6, terms, bytes / 1e6 / best);
+	}
+	return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -348,6 +379,7 @@ int main(int argc, char** argv) {
 		}
 		return 0;
 	}
+	if (cmd == "termgen-bench" && argc == 4) { return termgen_bench(argv[2], std::stoul(argv[3])); }
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
 	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | stem LANGUAGE WORDS | rank CORPUS N QUERIES\n";
 	return 2;
