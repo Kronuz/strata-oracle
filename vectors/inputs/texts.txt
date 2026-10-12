@@ -12,3 +12,11 @@ Emoji 😀 and symbols © ® ™ € £ ¥ § ¶ •.
    leading and trailing spaces   
 A single word
 apostrophes: rock'n'roll, ma'am, 'quoted', "double quoted"
+snake_case and CamelCase and kebab-case identifiers_with_digits_123
+abc123def 123abc 1st 2ND H2O R2D2 x86_64 iso-8859-1
+U.S.A. e.g. i.e. N.A.S.A. U.K.'s A.B.C.D.E.F.
+supercalifragilisticexpialidociousandthenitkeepsgoingandgoingandgoingpastsixtyfourcharacters word
+the the the over and over and over again
+Running Runs RAN ran running runner; Ponies pony's ponies'
+foo--bar foo---bar --leading trailing-- a-b-c
+O'Neil's rock'n'roll can't won't y'all ’curly’ apostrophes

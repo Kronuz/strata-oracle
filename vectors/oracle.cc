@@ -2,6 +2,7 @@
 // clean-room compatibility work. GPL (links Xapian); never shipped with strata.
 //
 //   oracle termgen  TEXTS_FILE             one text per line -> terms, wdf, positions per stem strategy
+//   oracle termgen-xapiand TEXTS_FILE      prefixes, wdf increments, stoppers, positionless indexing
 //   oracle parse    QUERIES_FILE           one query per line -> descriptions per flag set
 //   oracle stem     LANGUAGE WORDS_FILE    one word per line -> stem
 //   oracle rank     CORPUS_JSON N QUERIES  index N docs, then top-10 weights, percents, estimates
@@ -61,6 +62,48 @@ std::string terms_json(const Xapian::Document& doc) {
 		out += "]]";
 	}
 	return out + "]";
+}
+
+// Configurations Xapiand passes to TermGenerator: prefixes, wdf increments, stop
+// strategies with a stopper, and positionless indexing.
+int termgen_xapiand(const char* path) {
+	Xapian::SimpleStopper stopper;
+	for (const char* w : {"the", "a", "an", "and", "of", "to", "in", "is", "it", "over"}) { stopper.add(w); }
+	struct config {
+		const char* name;
+		const char* prefix;
+		Xapian::termcount wdf_inc;
+		bool positions;
+		Xapian::TermGenerator::stop_strategy stop;
+		Xapian::TermGenerator::stem_strategy stem;
+	};
+	const config configs[] = {
+		{"prefix", "XA", 1, true, Xapian::TermGenerator::STOP_NONE, Xapian::TermGenerator::STEM_NONE},
+		{"wdf_inc_3", "", 3, true, Xapian::TermGenerator::STOP_NONE, Xapian::TermGenerator::STEM_NONE},
+		{"positionless", "XB", 2, false, Xapian::TermGenerator::STOP_NONE, Xapian::TermGenerator::STEM_SOME},
+		{"stop_all", "", 1, true, Xapian::TermGenerator::STOP_ALL, Xapian::TermGenerator::STEM_SOME},
+		{"stop_stemmed", "", 1, true, Xapian::TermGenerator::STOP_STEMMED, Xapian::TermGenerator::STEM_SOME},
+		{"stop_none_stopper", "", 1, true, Xapian::TermGenerator::STOP_NONE, Xapian::TermGenerator::STEM_SOME},
+	};
+	for (const auto& text : lines(path)) {
+		for (const auto& c : configs) {
+			Xapian::TermGenerator g;
+			g.set_stemmer(Xapian::Stem("english"));
+			g.set_stemming_strategy(c.stem);
+			g.set_stopper(&stopper);
+			g.set_stopper_strategy(c.stop);
+			Xapian::Document doc;
+			g.set_document(doc);
+			if (c.positions) {
+				g.index_text(text, c.wdf_inc, c.prefix);
+			} else {
+				g.index_text_without_positions(text, c.wdf_inc, c.prefix);
+			}
+			std::cout << "{\"text\":" << json_string(text) << ",\"config\":\"" << c.name << "\",\"prefix\":" << json_string(c.prefix)
+			          << ",\"wdf_inc\":" << c.wdf_inc << ",\"positions\":" << (c.positions ? "true" : "false") << ",\"terms\":" << terms_json(doc) << "}\n";
+		}
+	}
+	return 0;
 }
 
 int termgen(const char* path) {
@@ -177,6 +220,7 @@ int rank(const char* corpus, std::size_t n, const char* queries_path) {
 int main(int argc, char** argv) {
 	std::string cmd = argc > 1 ? argv[1] : "";
 	if (cmd == "termgen" && argc == 3) { return termgen(argv[2]); }
+	if (cmd == "termgen-xapiand" && argc == 3) { return termgen_xapiand(argv[2]); }
 	if (cmd == "parse" && argc == 3) { return parse(argv[2]); }
 	if (cmd == "stem" && argc == 4) { return stem(argv[2], argv[3]); }
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
