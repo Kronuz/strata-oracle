@@ -357,3 +357,63 @@ customer +service phone number
 +eclipse -lunar -solar
 +springfield -illinois -missouri
 +puma -cat -shoes
+griffith NEAR observatory
+bowel NEAR obstruction
+vicenza NEAR italy
+digital NEAR scanning
+plus NEAR size NEAR clothing
+borders NEAR books
+american NEAR funds
+scottsdale NEAR az
+wisconsin NEAR attorney NEAR general
+the NEAR english NEAR restoration
+freelance NEAR work
+french NEAR culinary NEAR institute
+color NEAR combinations
+italian NEAR translation
+milwaukee NEAR newspaper
+robert NEAR green NEAR ingersoll
+omaha NEAR symphony
+body NEAR painting
+who NEAR dares NEAR wins
+stone NEAR mountain
+san NEAR francisco
+ford NEAR modeling NEAR agency
+glass NEAR works
+personal NEAR loan
+texas NEAR state NEAR legislature
+spiritual NEAR warfare
+georgia NEAR public NEAR broadcasting
+graffiti NEAR art
+texas NEAR death NEAR row
+catholic NEAR answers
+interest NEAR only
+region NEAR iv
+army NEAR reserve
+chicken NEAR coop
+people NEAR having NEAR sex
+new NEAR york NEAR population
+most NEAR improved NEAR player
+ear NEAR ache
+mercury NEAR insurance
+secretary NEAR of NEAR state
+third NEAR trimester
+hempstead NEAR new NEAR york
+university NEAR of NEAR washington
+japan NEAR airlines
+freedom NEAR tower
+virginia NEAR usa
+kasota NEAR stone
+intramuscular NEAR injections
+montessori NEAR schools
+oxford NEAR dictionary
+state NEAR of NEAR louisiana
+penny NEAR stocks
+cured NEAR of NEAR cancer
+helen NEAR of NEAR troy
+long NEAR legs
+sore NEAR muscles
+connecticut NEAR post
+danbury NEAR ct
+chicago NEAR bulls
+child NEAR support

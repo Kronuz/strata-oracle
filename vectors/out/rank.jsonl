@@ -1076,3 +1076,183 @@
 {"query":"+puma -cat -shoes","description":"Query((puma@1 AND_NOT (cat@2 OR shoes@3)))","check_at_least":0,"lower":3,"estimated":3,"upper":3,"hits":[[5712,9.0517549349773017,100],[7425,7.4665398878149496,82],[7257,5.7214230772713757,63]]}
 {"query":"+puma -cat -shoes","description":"Query((puma@1 AND_NOT (cat@2 OR shoes@3)))","check_at_least":100,"lower":3,"estimated":3,"upper":3,"hits":[[5712,9.0517549349773017,100],[7425,7.4665398878149496,82],[7257,5.7214230772713757,63]]}
 {"query":"+puma -cat -shoes","description":"Query((puma@1 AND_NOT (cat@2 OR shoes@3)))","check_at_least":10000,"lower":3,"estimated":3,"upper":3,"hits":[[5712,9.0517549349773017,100],[7425,7.4665398878149496,82],[7257,5.7214230772713757,63]]}
+{"query":"griffith NEAR observatory","description":"Query((griffith@1 NEAR 11 observatory@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[9148,15.520503432096167,100]]}
+{"query":"griffith NEAR observatory","description":"Query((griffith@1 NEAR 11 observatory@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[9148,15.520503432096167,100]]}
+{"query":"griffith NEAR observatory","description":"Query((griffith@1 NEAR 11 observatory@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[9148,15.520503432096167,100]]}
+{"query":"bowel NEAR obstruction","description":"Query((bowel@1 NEAR 11 obstruction@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"bowel NEAR obstruction","description":"Query((bowel@1 NEAR 11 obstruction@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"bowel NEAR obstruction","description":"Query((bowel@1 NEAR 11 obstruction@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"vicenza NEAR italy","description":"Query((vicenza@1 NEAR 11 italy@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"vicenza NEAR italy","description":"Query((vicenza@1 NEAR 11 italy@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"vicenza NEAR italy","description":"Query((vicenza@1 NEAR 11 italy@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"digital NEAR scanning","description":"Query((digital@1 NEAR 11 scanning@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"digital NEAR scanning","description":"Query((digital@1 NEAR 11 scanning@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"digital NEAR scanning","description":"Query((digital@1 NEAR 11 scanning@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"plus NEAR size NEAR clothing","description":"Query((plus@1 NEAR 12 size@2 NEAR 12 clothing@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"plus NEAR size NEAR clothing","description":"Query((plus@1 NEAR 12 size@2 NEAR 12 clothing@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"plus NEAR size NEAR clothing","description":"Query((plus@1 NEAR 12 size@2 NEAR 12 clothing@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"borders NEAR books","description":"Query((borders@1 NEAR 11 books@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"borders NEAR books","description":"Query((borders@1 NEAR 11 books@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"borders NEAR books","description":"Query((borders@1 NEAR 11 books@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"american NEAR funds","description":"Query((american@1 NEAR 11 funds@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[3424,7.2287945731987939,100]]}
+{"query":"american NEAR funds","description":"Query((american@1 NEAR 11 funds@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[3424,7.2287945731987939,100]]}
+{"query":"american NEAR funds","description":"Query((american@1 NEAR 11 funds@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[3424,7.2287945731987939,100]]}
+{"query":"scottsdale NEAR az","description":"Query((scottsdale@1 NEAR 11 az@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"scottsdale NEAR az","description":"Query((scottsdale@1 NEAR 11 az@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"scottsdale NEAR az","description":"Query((scottsdale@1 NEAR 11 az@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"wisconsin NEAR attorney NEAR general","description":"Query((wisconsin@1 NEAR 12 attorney@2 NEAR 12 general@3))","check_at_least":0,"lower":2,"estimated":2,"upper":2,"hits":[[3549,21.637354698893358,100],[2892,17.784693269882464,82]]}
+{"query":"wisconsin NEAR attorney NEAR general","description":"Query((wisconsin@1 NEAR 12 attorney@2 NEAR 12 general@3))","check_at_least":100,"lower":2,"estimated":2,"upper":2,"hits":[[3549,21.637354698893358,100],[2892,17.784693269882464,82]]}
+{"query":"wisconsin NEAR attorney NEAR general","description":"Query((wisconsin@1 NEAR 12 attorney@2 NEAR 12 general@3))","check_at_least":10000,"lower":2,"estimated":2,"upper":2,"hits":[[3549,21.637354698893358,100],[2892,17.784693269882464,82]]}
+{"query":"the NEAR english NEAR restoration","description":"Query((the@1 NEAR 12 english@2 NEAR 12 restoration@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"the NEAR english NEAR restoration","description":"Query((the@1 NEAR 12 english@2 NEAR 12 restoration@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"the NEAR english NEAR restoration","description":"Query((the@1 NEAR 12 english@2 NEAR 12 restoration@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"freelance NEAR work","description":"Query((freelance@1 NEAR 11 work@2))","check_at_least":0,"lower":4,"estimated":4,"upper":4,"hits":[[5585,9.8063313243188723,100],[7709,9.238273500128221,94],[2971,7.364363023854632,75],[883,6.8550748974719937,69]]}
+{"query":"freelance NEAR work","description":"Query((freelance@1 NEAR 11 work@2))","check_at_least":100,"lower":4,"estimated":4,"upper":4,"hits":[[5585,9.8063313243188723,100],[7709,9.238273500128221,94],[2971,7.364363023854632,75],[883,6.8550748974719937,69]]}
+{"query":"freelance NEAR work","description":"Query((freelance@1 NEAR 11 work@2))","check_at_least":10000,"lower":4,"estimated":4,"upper":4,"hits":[[5585,9.8063313243188723,100],[7709,9.238273500128221,94],[2971,7.364363023854632,75],[883,6.8550748974719937,69]]}
+{"query":"french NEAR culinary NEAR institute","description":"Query((french@1 NEAR 12 culinary@2 NEAR 12 institute@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"french NEAR culinary NEAR institute","description":"Query((french@1 NEAR 12 culinary@2 NEAR 12 institute@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"french NEAR culinary NEAR institute","description":"Query((french@1 NEAR 12 culinary@2 NEAR 12 institute@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"color NEAR combinations","description":"Query((color@1 NEAR 11 combinations@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[279,8.5987953253323752,100]]}
+{"query":"color NEAR combinations","description":"Query((color@1 NEAR 11 combinations@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[279,8.5987953253323752,100]]}
+{"query":"color NEAR combinations","description":"Query((color@1 NEAR 11 combinations@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[279,8.5987953253323752,100]]}
+{"query":"italian NEAR translation","description":"Query((italian@1 NEAR 11 translation@2))","check_at_least":0,"lower":2,"estimated":2,"upper":2,"hits":[[4099,9.5605244984342441,100],[5008,7.4759222909048173,78]]}
+{"query":"italian NEAR translation","description":"Query((italian@1 NEAR 11 translation@2))","check_at_least":100,"lower":2,"estimated":2,"upper":2,"hits":[[4099,9.5605244984342441,100],[5008,7.4759222909048173,78]]}
+{"query":"italian NEAR translation","description":"Query((italian@1 NEAR 11 translation@2))","check_at_least":10000,"lower":2,"estimated":2,"upper":2,"hits":[[4099,9.5605244984342441,100],[5008,7.4759222909048173,78]]}
+{"query":"milwaukee NEAR newspaper","description":"Query((milwaukee@1 NEAR 11 newspaper@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"milwaukee NEAR newspaper","description":"Query((milwaukee@1 NEAR 11 newspaper@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"milwaukee NEAR newspaper","description":"Query((milwaukee@1 NEAR 11 newspaper@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"robert NEAR green NEAR ingersoll","description":"Query((robert@1 NEAR 12 green@2 NEAR 12 ingersoll@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"robert NEAR green NEAR ingersoll","description":"Query((robert@1 NEAR 12 green@2 NEAR 12 ingersoll@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"robert NEAR green NEAR ingersoll","description":"Query((robert@1 NEAR 12 green@2 NEAR 12 ingersoll@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"omaha NEAR symphony","description":"Query((omaha@1 NEAR 11 symphony@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"omaha NEAR symphony","description":"Query((omaha@1 NEAR 11 symphony@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"omaha NEAR symphony","description":"Query((omaha@1 NEAR 11 symphony@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"body NEAR painting","description":"Query((body@1 NEAR 11 painting@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"body NEAR painting","description":"Query((body@1 NEAR 11 painting@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"body NEAR painting","description":"Query((body@1 NEAR 11 painting@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"who NEAR dares NEAR wins","description":"Query((who@1 NEAR 12 dares@2 NEAR 12 wins@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"who NEAR dares NEAR wins","description":"Query((who@1 NEAR 12 dares@2 NEAR 12 wins@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"who NEAR dares NEAR wins","description":"Query((who@1 NEAR 12 dares@2 NEAR 12 wins@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"stone NEAR mountain","description":"Query((stone@1 NEAR 11 mountain@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[2099,11.903805356560589,100]]}
+{"query":"stone NEAR mountain","description":"Query((stone@1 NEAR 11 mountain@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[2099,11.903805356560589,100]]}
+{"query":"stone NEAR mountain","description":"Query((stone@1 NEAR 11 mountain@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[2099,11.903805356560589,100]]}
+{"query":"san NEAR francisco","description":"Query((san@1 NEAR 11 francisco@2))","check_at_least":0,"lower":23,"estimated":30,"upper":67,"hits":[[746,14.626893759441074,100],[6394,14.230651670341485,97],[5830,14.180626801145756,96],[3660,13.919204111778896,95],[9150,12.891478910132506,88],[6391,12.772829074924676,87],[4660,12.395344732440961,84],[6141,12.219307586115018,83],[4375,11.702890814395065,80],[1711,11.585789587141903,79]]}
+{"query":"san NEAR francisco","description":"Query((san@1 NEAR 11 francisco@2))","check_at_least":100,"lower":40,"estimated":40,"upper":40,"hits":[[746,14.626893759441074,100],[6394,14.230651670341485,97],[5830,14.180626801145756,96],[3660,13.919204111778896,95],[9150,12.891478910132506,88],[6391,12.772829074924676,87],[4660,12.395344732440961,84],[6141,12.219307586115018,83],[4375,11.702890814395065,80],[1711,11.585789587141903,79]]}
+{"query":"san NEAR francisco","description":"Query((san@1 NEAR 11 francisco@2))","check_at_least":10000,"lower":40,"estimated":40,"upper":40,"hits":[[746,14.626893759441074,100],[6394,14.230651670341485,97],[5830,14.180626801145756,96],[3660,13.919204111778896,95],[9150,12.891478910132506,88],[6391,12.772829074924676,87],[4660,12.395344732440961,84],[6141,12.219307586115018,83],[4375,11.702890814395065,80],[1711,11.585789587141903,79]]}
+{"query":"ford NEAR modeling NEAR agency","description":"Query((ford@1 NEAR 12 modeling@2 NEAR 12 agency@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"ford NEAR modeling NEAR agency","description":"Query((ford@1 NEAR 12 modeling@2 NEAR 12 agency@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"ford NEAR modeling NEAR agency","description":"Query((ford@1 NEAR 12 modeling@2 NEAR 12 agency@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"glass NEAR works","description":"Query((glass@1 NEAR 11 works@2))","check_at_least":0,"lower":2,"estimated":2,"upper":2,"hits":[[4763,9.7673788977082392,100],[8171,9.5639404373359582,97]]}
+{"query":"glass NEAR works","description":"Query((glass@1 NEAR 11 works@2))","check_at_least":100,"lower":2,"estimated":2,"upper":2,"hits":[[4763,9.7673788977082392,100],[8171,9.5639404373359582,97]]}
+{"query":"glass NEAR works","description":"Query((glass@1 NEAR 11 works@2))","check_at_least":10000,"lower":2,"estimated":2,"upper":2,"hits":[[4763,9.7673788977082392,100],[8171,9.5639404373359582,97]]}
+{"query":"personal NEAR loan","description":"Query((personal@1 NEAR 11 loan@2))","check_at_least":0,"lower":2,"estimated":2,"upper":2,"hits":[[2032,9.7278873984345875,100],[9270,5.9599431589120453,61]]}
+{"query":"personal NEAR loan","description":"Query((personal@1 NEAR 11 loan@2))","check_at_least":100,"lower":2,"estimated":2,"upper":2,"hits":[[2032,9.7278873984345875,100],[9270,5.9599431589120453,61]]}
+{"query":"personal NEAR loan","description":"Query((personal@1 NEAR 11 loan@2))","check_at_least":10000,"lower":2,"estimated":2,"upper":2,"hits":[[2032,9.7278873984345875,100],[9270,5.9599431589120453,61]]}
+{"query":"texas NEAR state NEAR legislature","description":"Query((texas@1 NEAR 12 state@2 NEAR 12 legislature@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"texas NEAR state NEAR legislature","description":"Query((texas@1 NEAR 12 state@2 NEAR 12 legislature@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"texas NEAR state NEAR legislature","description":"Query((texas@1 NEAR 12 state@2 NEAR 12 legislature@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"spiritual NEAR warfare","description":"Query((spiritual@1 NEAR 11 warfare@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"spiritual NEAR warfare","description":"Query((spiritual@1 NEAR 11 warfare@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"spiritual NEAR warfare","description":"Query((spiritual@1 NEAR 11 warfare@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"georgia NEAR public NEAR broadcasting","description":"Query((georgia@1 NEAR 12 public@2 NEAR 12 broadcasting@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"georgia NEAR public NEAR broadcasting","description":"Query((georgia@1 NEAR 12 public@2 NEAR 12 broadcasting@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"georgia NEAR public NEAR broadcasting","description":"Query((georgia@1 NEAR 12 public@2 NEAR 12 broadcasting@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"graffiti NEAR art","description":"Query((graffiti@1 NEAR 11 art@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"graffiti NEAR art","description":"Query((graffiti@1 NEAR 11 art@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"graffiti NEAR art","description":"Query((graffiti@1 NEAR 11 art@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"texas NEAR death NEAR row","description":"Query((texas@1 NEAR 12 death@2 NEAR 12 row@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"texas NEAR death NEAR row","description":"Query((texas@1 NEAR 12 death@2 NEAR 12 row@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"texas NEAR death NEAR row","description":"Query((texas@1 NEAR 12 death@2 NEAR 12 row@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"catholic NEAR answers","description":"Query((catholic@1 NEAR 11 answers@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"catholic NEAR answers","description":"Query((catholic@1 NEAR 11 answers@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"catholic NEAR answers","description":"Query((catholic@1 NEAR 11 answers@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"interest NEAR only","description":"Query((interest@1 NEAR 11 only@2))","check_at_least":0,"lower":5,"estimated":5,"upper":5,"hits":[[2777,6.7382985463504994,100],[4146,6.6439207331555679,98],[5574,6.175773460668756,91],[3819,5.532370145087361,82],[2184,3.1798440476428449,47]]}
+{"query":"interest NEAR only","description":"Query((interest@1 NEAR 11 only@2))","check_at_least":100,"lower":5,"estimated":5,"upper":5,"hits":[[2777,6.7382985463504994,100],[4146,6.6439207331555679,98],[5574,6.175773460668756,91],[3819,5.532370145087361,82],[2184,3.1798440476428449,47]]}
+{"query":"interest NEAR only","description":"Query((interest@1 NEAR 11 only@2))","check_at_least":10000,"lower":5,"estimated":5,"upper":5,"hits":[[2777,6.7382985463504994,100],[4146,6.6439207331555679,98],[5574,6.175773460668756,91],[3819,5.532370145087361,82],[2184,3.1798440476428449,47]]}
+{"query":"region NEAR iv","description":"Query((region@1 NEAR 11 iv@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"region NEAR iv","description":"Query((region@1 NEAR 11 iv@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"region NEAR iv","description":"Query((region@1 NEAR 11 iv@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"army NEAR reserve","description":"Query((army@1 NEAR 11 reserve@2))","check_at_least":0,"lower":6,"estimated":6,"upper":6,"hits":[[8497,11.603607668662189,100],[4584,9.1294593107618329,78],[6356,7.8829502146318919,67],[4319,7.5316916251194614,64],[2885,7.5267880589175222,64],[9270,5.6150876177366218,48]]}
+{"query":"army NEAR reserve","description":"Query((army@1 NEAR 11 reserve@2))","check_at_least":100,"lower":6,"estimated":6,"upper":6,"hits":[[8497,11.603607668662189,100],[4584,9.1294593107618329,78],[6356,7.8829502146318919,67],[4319,7.5316916251194614,64],[2885,7.5267880589175222,64],[9270,5.6150876177366218,48]]}
+{"query":"army NEAR reserve","description":"Query((army@1 NEAR 11 reserve@2))","check_at_least":10000,"lower":6,"estimated":6,"upper":6,"hits":[[8497,11.603607668662189,100],[4584,9.1294593107618329,78],[6356,7.8829502146318919,67],[4319,7.5316916251194614,64],[2885,7.5267880589175222,64],[9270,5.6150876177366218,48]]}
+{"query":"chicken NEAR coop","description":"Query((chicken@1 NEAR 11 coop@2))","check_at_least":0,"lower":3,"estimated":3,"upper":3,"hits":[[2782,15.912866670726633,100],[709,13.972867142588239,87],[1955,11.608573228492578,72]]}
+{"query":"chicken NEAR coop","description":"Query((chicken@1 NEAR 11 coop@2))","check_at_least":100,"lower":3,"estimated":3,"upper":3,"hits":[[2782,15.912866670726633,100],[709,13.972867142588239,87],[1955,11.608573228492578,72]]}
+{"query":"chicken NEAR coop","description":"Query((chicken@1 NEAR 11 coop@2))","check_at_least":10000,"lower":3,"estimated":3,"upper":3,"hits":[[2782,15.912866670726633,100],[709,13.972867142588239,87],[1955,11.608573228492578,72]]}
+{"query":"people NEAR having NEAR sex","description":"Query((people@1 NEAR 12 having@2 NEAR 12 sex@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"people NEAR having NEAR sex","description":"Query((people@1 NEAR 12 having@2 NEAR 12 sex@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"people NEAR having NEAR sex","description":"Query((people@1 NEAR 12 having@2 NEAR 12 sex@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"new NEAR york NEAR population","description":"Query((new@1 NEAR 12 york@2 NEAR 12 population@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"new NEAR york NEAR population","description":"Query((new@1 NEAR 12 york@2 NEAR 12 population@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"new NEAR york NEAR population","description":"Query((new@1 NEAR 12 york@2 NEAR 12 population@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"most NEAR improved NEAR player","description":"Query((most@1 NEAR 12 improved@2 NEAR 12 player@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"most NEAR improved NEAR player","description":"Query((most@1 NEAR 12 improved@2 NEAR 12 player@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"most NEAR improved NEAR player","description":"Query((most@1 NEAR 12 improved@2 NEAR 12 player@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"ear NEAR ache","description":"Query((ear@1 NEAR 11 ache@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"ear NEAR ache","description":"Query((ear@1 NEAR 11 ache@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"ear NEAR ache","description":"Query((ear@1 NEAR 11 ache@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"mercury NEAR insurance","description":"Query((mercury@1 NEAR 11 insurance@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"mercury NEAR insurance","description":"Query((mercury@1 NEAR 11 insurance@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"mercury NEAR insurance","description":"Query((mercury@1 NEAR 11 insurance@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"secretary NEAR of NEAR state","description":"Query((secretary@1 NEAR 12 of@2 NEAR 12 state@3))","check_at_least":0,"lower":19,"estimated":20,"upper":157,"hits":[[3623,11.152146581576426,100],[3678,9.2990541409513146,83],[1183,8.983191508802074,80],[3680,8.8185137093034207,79],[5002,8.4860646570583107,76],[9767,8.4009256184836794,75],[4319,8.0109106909138248,71],[1807,7.6089441287147643,68],[8600,7.4388005647672948,66],[5071,7.2465932103219419,64]]}
+{"query":"secretary NEAR of NEAR state","description":"Query((secretary@1 NEAR 12 of@2 NEAR 12 state@3))","check_at_least":100,"lower":26,"estimated":26,"upper":26,"hits":[[3623,11.152146581576426,100],[3678,9.2990541409513146,83],[1183,8.983191508802074,80],[3680,8.8185137093034207,79],[5002,8.4860646570583107,76],[9767,8.4009256184836794,75],[4319,8.0109106909138248,71],[1807,7.6089441287147643,68],[8600,7.4388005647672948,66],[5071,7.2465932103219419,64]]}
+{"query":"secretary NEAR of NEAR state","description":"Query((secretary@1 NEAR 12 of@2 NEAR 12 state@3))","check_at_least":10000,"lower":26,"estimated":26,"upper":26,"hits":[[3623,11.152146581576426,100],[3678,9.2990541409513146,83],[1183,8.983191508802074,80],[3680,8.8185137093034207,79],[5002,8.4860646570583107,76],[9767,8.4009256184836794,75],[4319,8.0109106909138248,71],[1807,7.6089441287147643,68],[8600,7.4388005647672948,66],[5071,7.2465932103219419,64]]}
+{"query":"third NEAR trimester","description":"Query((third@1 NEAR 11 trimester@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"third NEAR trimester","description":"Query((third@1 NEAR 11 trimester@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"third NEAR trimester","description":"Query((third@1 NEAR 11 trimester@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"hempstead NEAR new NEAR york","description":"Query((hempstead@1 NEAR 12 new@2 NEAR 12 york@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"hempstead NEAR new NEAR york","description":"Query((hempstead@1 NEAR 12 new@2 NEAR 12 york@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"hempstead NEAR new NEAR york","description":"Query((hempstead@1 NEAR 12 new@2 NEAR 12 york@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"university NEAR of NEAR washington","description":"Query((university@1 NEAR 12 of@2 NEAR 12 washington@3))","check_at_least":0,"lower":14,"estimated":20,"upper":103,"hits":[[4822,11.101266605460911,100],[7485,10.286316037052849,92],[4880,10.067191616896114,90],[4828,9.7153021735935141,87],[517,9.0394895195553193,81],[1807,9.0223053768953676,81],[4817,8.94672670678999,80],[5820,8.0248221850026535,72],[8279,7.7312559778043122,69],[9306,7.7201117039595069,69]]}
+{"query":"university NEAR of NEAR washington","description":"Query((university@1 NEAR 12 of@2 NEAR 12 washington@3))","check_at_least":100,"lower":15,"estimated":15,"upper":15,"hits":[[4822,11.101266605460911,100],[7485,10.286316037052849,92],[4880,10.067191616896114,90],[4828,9.7153021735935141,87],[517,9.0394895195553193,81],[1807,9.0223053768953676,81],[4817,8.94672670678999,80],[5820,8.0248221850026535,72],[8279,7.7312559778043122,69],[9306,7.7201117039595069,69]]}
+{"query":"university NEAR of NEAR washington","description":"Query((university@1 NEAR 12 of@2 NEAR 12 washington@3))","check_at_least":10000,"lower":15,"estimated":15,"upper":15,"hits":[[4822,11.101266605460911,100],[7485,10.286316037052849,92],[4880,10.067191616896114,90],[4828,9.7153021735935141,87],[517,9.0394895195553193,81],[1807,9.0223053768953676,81],[4817,8.94672670678999,80],[5820,8.0248221850026535,72],[8279,7.7312559778043122,69],[9306,7.7201117039595069,69]]}
+{"query":"japan NEAR airlines","description":"Query((japan@1 NEAR 11 airlines@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"japan NEAR airlines","description":"Query((japan@1 NEAR 11 airlines@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"japan NEAR airlines","description":"Query((japan@1 NEAR 11 airlines@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"freedom NEAR tower","description":"Query((freedom@1 NEAR 11 tower@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"freedom NEAR tower","description":"Query((freedom@1 NEAR 11 tower@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"freedom NEAR tower","description":"Query((freedom@1 NEAR 11 tower@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"virginia NEAR usa","description":"Query((virginia@1 NEAR 11 usa@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[5943,7.2551334851208029,100]]}
+{"query":"virginia NEAR usa","description":"Query((virginia@1 NEAR 11 usa@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[5943,7.2551334851208029,100]]}
+{"query":"virginia NEAR usa","description":"Query((virginia@1 NEAR 11 usa@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[5943,7.2551334851208029,100]]}
+{"query":"kasota NEAR stone","description":"Query((kasota@1 NEAR 11 stone@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"kasota NEAR stone","description":"Query((kasota@1 NEAR 11 stone@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"kasota NEAR stone","description":"Query((kasota@1 NEAR 11 stone@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"intramuscular NEAR injections","description":"Query((intramuscular@1 NEAR 11 injections@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[2226,16.298481818295407,100]]}
+{"query":"intramuscular NEAR injections","description":"Query((intramuscular@1 NEAR 11 injections@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[2226,16.298481818295407,100]]}
+{"query":"intramuscular NEAR injections","description":"Query((intramuscular@1 NEAR 11 injections@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[2226,16.298481818295407,100]]}
+{"query":"montessori NEAR schools","description":"Query((montessori@1 NEAR 11 schools@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"montessori NEAR schools","description":"Query((montessori@1 NEAR 11 schools@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"montessori NEAR schools","description":"Query((montessori@1 NEAR 11 schools@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"oxford NEAR dictionary","description":"Query((oxford@1 NEAR 11 dictionary@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[6270,3.0198965685078383,100]]}
+{"query":"oxford NEAR dictionary","description":"Query((oxford@1 NEAR 11 dictionary@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[6270,3.0198965685078383,100]]}
+{"query":"oxford NEAR dictionary","description":"Query((oxford@1 NEAR 11 dictionary@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[6270,3.0198965685078383,100]]}
+{"query":"state NEAR of NEAR louisiana","description":"Query((state@1 NEAR 12 of@2 NEAR 12 louisiana@3))","check_at_least":0,"lower":6,"estimated":6,"upper":6,"hits":[[1387,12.288844633627571,100],[6582,12.269888403823145,99],[1465,10.280685274831503,83],[5155,9.7948141535540518,79],[8919,9.7747718244989326,79],[104,3.3503969022888369,27]]}
+{"query":"state NEAR of NEAR louisiana","description":"Query((state@1 NEAR 12 of@2 NEAR 12 louisiana@3))","check_at_least":100,"lower":6,"estimated":6,"upper":6,"hits":[[1387,12.288844633627571,100],[6582,12.269888403823145,99],[1465,10.280685274831503,83],[5155,9.7948141535540518,79],[8919,9.7747718244989326,79],[104,3.3503969022888369,27]]}
+{"query":"state NEAR of NEAR louisiana","description":"Query((state@1 NEAR 12 of@2 NEAR 12 louisiana@3))","check_at_least":10000,"lower":6,"estimated":6,"upper":6,"hits":[[1387,12.288844633627571,100],[6582,12.269888403823145,99],[1465,10.280685274831503,83],[5155,9.7948141535540518,79],[8919,9.7747718244989326,79],[104,3.3503969022888369,27]]}
+{"query":"penny NEAR stocks","description":"Query((penny@1 NEAR 11 stocks@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"penny NEAR stocks","description":"Query((penny@1 NEAR 11 stocks@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"penny NEAR stocks","description":"Query((penny@1 NEAR 11 stocks@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"cured NEAR of NEAR cancer","description":"Query((cured@1 NEAR 12 of@2 NEAR 12 cancer@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"cured NEAR of NEAR cancer","description":"Query((cured@1 NEAR 12 of@2 NEAR 12 cancer@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"cured NEAR of NEAR cancer","description":"Query((cured@1 NEAR 12 of@2 NEAR 12 cancer@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"helen NEAR of NEAR troy","description":"Query((helen@1 NEAR 12 of@2 NEAR 12 troy@3))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"helen NEAR of NEAR troy","description":"Query((helen@1 NEAR 12 of@2 NEAR 12 troy@3))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"helen NEAR of NEAR troy","description":"Query((helen@1 NEAR 12 of@2 NEAR 12 troy@3))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"long NEAR legs","description":"Query((long@1 NEAR 11 legs@2))","check_at_least":0,"lower":2,"estimated":2,"upper":2,"hits":[[5652,12.264248529352466,100],[7782,8.2009666038578555,66]]}
+{"query":"long NEAR legs","description":"Query((long@1 NEAR 11 legs@2))","check_at_least":100,"lower":2,"estimated":2,"upper":2,"hits":[[5652,12.264248529352466,100],[7782,8.2009666038578555,66]]}
+{"query":"long NEAR legs","description":"Query((long@1 NEAR 11 legs@2))","check_at_least":10000,"lower":2,"estimated":2,"upper":2,"hits":[[5652,12.264248529352466,100],[7782,8.2009666038578555,66]]}
+{"query":"sore NEAR muscles","description":"Query((sore@1 NEAR 11 muscles@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"sore NEAR muscles","description":"Query((sore@1 NEAR 11 muscles@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"sore NEAR muscles","description":"Query((sore@1 NEAR 11 muscles@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"connecticut NEAR post","description":"Query((connecticut@1 NEAR 11 post@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"connecticut NEAR post","description":"Query((connecticut@1 NEAR 11 post@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"connecticut NEAR post","description":"Query((connecticut@1 NEAR 11 post@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"danbury NEAR ct","description":"Query((danbury@1 NEAR 11 ct@2))","check_at_least":0,"lower":1,"estimated":1,"upper":1,"hits":[[2294,15.730214538823159,100]]}
+{"query":"danbury NEAR ct","description":"Query((danbury@1 NEAR 11 ct@2))","check_at_least":100,"lower":1,"estimated":1,"upper":1,"hits":[[2294,15.730214538823159,100]]}
+{"query":"danbury NEAR ct","description":"Query((danbury@1 NEAR 11 ct@2))","check_at_least":10000,"lower":1,"estimated":1,"upper":1,"hits":[[2294,15.730214538823159,100]]}
+{"query":"chicago NEAR bulls","description":"Query((chicago@1 NEAR 11 bulls@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"chicago NEAR bulls","description":"Query((chicago@1 NEAR 11 bulls@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"chicago NEAR bulls","description":"Query((chicago@1 NEAR 11 bulls@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"child NEAR support","description":"Query((child@1 NEAR 11 support@2))","check_at_least":0,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"child NEAR support","description":"Query((child@1 NEAR 11 support@2))","check_at_least":100,"lower":0,"estimated":0,"upper":0,"hits":[]}
+{"query":"child NEAR support","description":"Query((child@1 NEAR 11 support@2))","check_at_least":10000,"lower":0,"estimated":0,"upper":0,"hits":[]}
