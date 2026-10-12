@@ -2,6 +2,7 @@
 // clean-room compatibility work. GPL (links Xapian); never shipped with strata.
 //
 //   oracle termgen  TEXTS_FILE             one text per line -> terms, wdf, positions per stem strategy
+//   oracle unicode                         every code point's category and lowercase mapping
 //   oracle termgen-xapiand TEXTS_FILE      prefixes, wdf increments, stoppers, positionless indexing
 //   oracle parse    QUERIES_FILE           one query per line -> descriptions per flag set
 //   oracle stem     LANGUAGE WORDS_FILE    one word per line -> stem
@@ -102,6 +103,18 @@ int termgen_xapiand(const char* path) {
 			std::cout << "{\"text\":" << json_string(text) << ",\"config\":\"" << c.name << "\",\"prefix\":" << json_string(c.prefix)
 			          << ",\"wdf_inc\":" << c.wdf_inc << ",\"positions\":" << (c.positions ? "true" : "false") << ",\"terms\":" << terms_json(doc) << "}\n";
 		}
+	}
+	return 0;
+}
+
+// Every assigned code point's general category and lowercase mapping, as Xapian's public
+// Unicode API reports them (pins Xapian's Unicode tables, whatever version they are).
+int unicode_table() {
+	for (unsigned cp = 0; cp <= 0x10FFFF; ++cp) {
+		const int category = int(Xapian::Unicode::get_category(cp));
+		const unsigned lower = Xapian::Unicode::tolower(cp);
+		if (category == int(Xapian::Unicode::UNASSIGNED) && lower == cp) { continue; }
+		std::cout << cp << ' ' << category << ' ' << lower << '\n';
 	}
 	return 0;
 }
@@ -220,6 +233,7 @@ int rank(const char* corpus, std::size_t n, const char* queries_path) {
 int main(int argc, char** argv) {
 	std::string cmd = argc > 1 ? argv[1] : "";
 	if (cmd == "termgen" && argc == 3) { return termgen(argv[2]); }
+	if (cmd == "unicode" && argc == 2) { return unicode_table(); }
 	if (cmd == "termgen-xapiand" && argc == 3) { return termgen_xapiand(argv[2]); }
 	if (cmd == "parse" && argc == 3) { return parse(argv[2]); }
 	if (cmd == "stem" && argc == 4) { return stem(argv[2], argv[3]); }
