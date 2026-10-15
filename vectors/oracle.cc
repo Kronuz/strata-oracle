@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -359,6 +360,117 @@ int termgen_bench(const char* corpus, std::size_t n) {
 	return 0;
 }
 
+// Phase 4's vectors: a seeded structured corpus, written out in plain JSON so strata's
+// tests rebuild it without sortable_serialise, then Xapian's answers over it: value
+// ranges, sorts by value and by a multi-key with docid ties, collapse with its counts and
+// both estimate triples, MatchSpy counts per check_at_least, and percent with a scored
+// value source.
+int values(std::size_t n) {
+	std::mt19937_64 random(4);
+	Xapian::WritableDatabase db(std::string(), Xapian::DB_BACKEND_INMEMORY);
+	const char* categories[] = {"alpha", "beta", "gamma", "delta", "epsilon"};
+	for (std::size_t i = 0; i < n; ++i) {
+		Xapian::Document doc;
+		std::vector<int> words;
+		// Term ids skewed toward small ones, so some terms are frequent.
+		for (unsigned k = 0, len = 5 + random() % 11; k < len; ++k) { words.push_back(int(random() % (1 + random() % 50))); }
+		const auto price = std::int64_t(random() % 2001) - 1000;
+		const double rating = double(random() % 1000001) / 1000.0 - 500.0;
+		const char* category = categories[random() % 5];
+		const double date = 1.6e9 + double(random() % 100000000);
+		Xapian::termpos pos = 0;
+		std::cout << "{\"doc\":" << i + 1 << ",\"terms\":[";
+		for (std::size_t k = 0; k < words.size(); ++k) {
+			doc.add_posting("w" + std::to_string(words[k]), ++pos);
+			std::cout << (k ? "," : "") << json_string("w" + std::to_string(words[k]));
+		}
+		char r[64]; std::snprintf(r, sizeof r, "%.17g", rating); char d[64]; std::snprintf(d, sizeof d, "%.17g", date);
+		std::cout << "],\"price\":" << price << ",\"rating\":" << r << ",\"category\":" << json_string(category) << ",\"date\":" << d << "}\n";
+		doc.add_value(0, Xapian::sortable_serialise(double(price)));
+		doc.add_value(1, Xapian::sortable_serialise(rating));
+		doc.add_value(2, category);
+		doc.add_value(3, Xapian::sortable_serialise(date));
+		db.add_document(doc);
+	}
+	db.commit();
+	Xapian::Enquire enquire(db);
+	auto ids = [&](const Xapian::MSet& mset) {
+		std::string out = "["; bool first = true;
+		for (auto m = mset.begin(); m != mset.end(); ++m) { out += (first ? "" : ",") + std::to_string(*m); first = false; }
+		return out + "]";
+	};
+	auto text = [&](unsigned q) {
+		std::vector<Xapian::Query> terms;
+		for (unsigned k = 0; k <= q % 3; ++k) { terms.emplace_back("w" + std::to_string((q * 7 + k * 3) % 50)); }
+		return Xapian::Query(q % 2 ? Xapian::Query::OP_AND : Xapian::Query::OP_OR, terms.begin(), terms.end());
+	};
+	// Ranges over each numeric slot, with Xapian's inclusive bounds.
+	for (unsigned q = 0; q < 40; ++q) {
+		const unsigned slot = q % 2 ? 1 : 0;
+		double lo = slot ? double(random() % 1000) - 500.0 : double(std::int64_t(random() % 2001) - 1000), hi = lo + double(random() % (slot ? 300 : 600));
+		enquire.set_query(Xapian::Query(Xapian::Query::OP_VALUE_RANGE, slot, Xapian::sortable_serialise(lo), Xapian::sortable_serialise(hi)));
+		enquire.set_sort_by_relevance();
+		auto mset = enquire.get_mset(0, db.get_doccount());
+		char l[64], h[64]; std::snprintf(l, sizeof l, "%.17g", lo); std::snprintf(h, sizeof h, "%.17g", hi);
+		std::cout << "{\"range\":{\"slot\":" << slot << ",\"lo\":" << l << ",\"hi\":" << h << "},\"matches\":" << ids(mset) << "}\n";
+	}
+	// Sorts: one slot either way, and a multi-key (category ascending, then price descending).
+	for (unsigned q = 0; q < 30; ++q) {
+		enquire.set_query(text(q));
+		const char* mode;
+		Xapian::MultiValueKeyMaker keys;
+		if (q % 3 == 2) { keys.add_value(2, false); keys.add_value(0, true); enquire.set_sort_by_key(&keys, false); mode = "category asc, price desc"; }
+		else { enquire.set_sort_by_value(q % 3 ? 1 : 0, q % 2 == 1); mode = q % 3 ? "rating" : "price"; }
+		auto mset = enquire.get_mset(0, 25);
+		std::cout << "{\"sort\":" << json_string(mode) << ",\"reverse\":" << (q % 3 != 2 && q % 2 == 1 ? "true" : "false") << ",\"query\":" << json_string(text(q).get_description())
+			<< ",\"hits\":" << ids(mset) << "}\n";
+	}
+	enquire.set_sort_by_relevance();
+	// Collapse by category, with counts and both triples, at several check_at_least.
+	for (unsigned q = 0; q < 20; ++q) {
+		enquire.set_query(text(q));
+		enquire.set_collapse_key(2, 1 + q % 3);
+		for (Xapian::doccount check : {0u, 50u, db.get_doccount()}) {
+			auto mset = enquire.get_mset(0, 10, check);
+			std::cout << "{\"collapse\":{\"slot\":2,\"max\":" << 1 + q % 3 << "},\"query\":" << json_string(text(q).get_description()) << ",\"check_at_least\":" << check << ",\"hits\":[";
+			bool first = true;
+			for (auto m = mset.begin(); m != mset.end(); ++m) { std::cout << (first ? "" : ",") << "[" << *m << "," << m.get_collapse_count() << "]"; first = false; }
+			std::cout << "],\"matches\":[" << mset.get_matches_lower_bound() << "," << mset.get_matches_estimated() << "," << mset.get_matches_upper_bound()
+				<< "],\"uncollapsed\":[" << mset.get_uncollapsed_matches_lower_bound() << "," << mset.get_uncollapsed_matches_estimated() << "," << mset.get_uncollapsed_matches_upper_bound() << "]}\n";
+		}
+	}
+	enquire.set_collapse_key(Xapian::BAD_VALUENO);
+	// MatchSpy over the category, per check_at_least: which documents it saw.
+	for (unsigned q = 0; q < 20; ++q) {
+		enquire.set_query(text(q));
+		for (Xapian::doccount check : {0u, 50u, db.get_doccount()}) {
+			Xapian::ValueCountMatchSpy spy(2);
+			enquire.clear_matchspies(); enquire.add_matchspy(&spy);
+			auto mset = enquire.get_mset(0, 10, check);
+			std::cout << "{\"spy\":2,\"query\":" << json_string(text(q).get_description()) << ",\"check_at_least\":" << check << ",\"total\":" << spy.get_total() << ",\"counts\":{";
+			bool first = true;
+			for (auto v = spy.values_begin(); v != spy.values_end(); ++v) { std::cout << (first ? "" : ",") << json_string(*v) << ":" << v.get_termfreq(); first = false; }
+			std::cout << "},\"matches\":[" << mset.get_matches_lower_bound() << "," << mset.get_matches_estimated() << "," << mset.get_matches_upper_bound() << "]}\n";
+		}
+	}
+	enquire.clear_matchspies();
+	// Percent with a scored value source beside the text.
+	for (unsigned q = 0; q < 20; ++q) {
+		Xapian::ValueWeightPostingSource source(1);
+		Xapian::Query query(Xapian::Query::OP_AND_MAYBE, text(q), Xapian::Query(&source));
+		enquire.set_query(query);
+		auto mset = enquire.get_mset(0, 10, db.get_doccount());
+		std::cout << "{\"percent\":" << json_string(query.get_description()) << ",\"hits\":[";
+		bool first = true;
+		for (auto m = mset.begin(); m != mset.end(); ++m) {
+			char w[64]; std::snprintf(w, sizeof w, "%.17g", m.get_weight());
+			std::cout << (first ? "" : ",") << "[" << *m << "," << w << "," << m.get_percent() << "]"; first = false;
+		}
+		std::cout << "]}\n";
+	}
+	return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -381,6 +493,7 @@ int main(int argc, char** argv) {
 	}
 	if (cmd == "termgen-bench" && argc == 4) { return termgen_bench(argv[2], std::stoul(argv[3])); }
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
-	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | stem LANGUAGE WORDS | rank CORPUS N QUERIES\n";
+	if (cmd == "values" && argc == 3) { return values(std::stoul(argv[2])); }
+	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | stem LANGUAGE WORDS | rank CORPUS N QUERIES | values N\n";
 	return 2;
 }
