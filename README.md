@@ -78,3 +78,83 @@ Notes on what the rows show for Xapian 2.1.0 under Xapiand's settings:
 - `OP_NEAR and OP_PHRASE only currently support leaf subqueries` is raised (26 rows) when
   NEAR or ADJ meets a bracket or a composite operand.
 - A stemmed term carries `Z` before the field prefix (`ZSa`).
+
+## parse-v3
+
+`vectors/out/parse-v3.jsonl` (1,995 rows) records variations of the query shapes the queryparser's T2 run
+against parse-v2 still fails (the `open` rows of its `EXCEPTIONS-v2.md`), and the four open shapes of CR2
+(`a OR -b`, `a XOR -b`, `a AND NOT -b`, `a AND --b`). Regenerate with
+`vectors/gen-parse-v3.py > vectors/inputs/parse-v3.tsv` and
+`oracle parse-v2 inputs/parse-v3.tsv inputs/stopwords > out/parse-v3.jsonl`; two runs are byte-identical.
+The rows have parse-v2's shape and the same settings fields; the query is never rewritten (no trailing `*`
+handling), so `query` is exactly what the parser saw.
+
+Each group is one shape: a primary template over every operand pattern and configuration, then a few
+neighbouring templates (another position, operator or sign) over the all-stop and all-non-stop patterns. One
+factor changes between neighbouring rows:
+
+| Factor | Values |
+|---|---|
+| Operands | `a b c d` (single-letter stop words), `foo bar baz qux` (non-stop), one stop word in each position; `the an of is` (ordinary stop words) for the single-operand shapes |
+| Default operator | `and`, `or`, `unset` (Xapian's OR); `near` and `phrase` where noted |
+| BOOLEAN | on with `and`/`or`; absent with `and`; present with `unset` |
+| Flags | none extra, `partial`, `wildcard`, `wildcard`+`wildcard_multi`+`wildcard_single` (any query holding `*`), `cjk_ngram`, `pure_not`, `boolean_any_case`, LOVEHATE off |
+| Stopper | `en` (STOP_STEMMED), none, STOP_ALL, STOP_NONE |
+| Stemmer | STEM_SOME (Xapiand), none, STEM_ALL_Z |
+| Prefix | `S`; `title.S` for the `~` shapes |
+
+Groups (shape, rows). A `-forms` group holds the same CR2 shape in other forms (more terms, a phrase, a
+bracket, a missing operand):
+
+| Group | Rows |
+|---|---|
+| `close-after` | 40 |
+| `close-group` | 40 |
+| `close-lead-star` | 33 |
+| `open-glued` | 40 |
+| `open-nested` | 40 |
+| `open-quote` | 36 |
+| `near-paren` | 40 |
+| `near-paren-mixed` | 40 |
+| `glued-call` | 40 |
+| `glued-call-tail` | 40 |
+| `near-quote-left` | 40 |
+| `near-quote-right` | 40 |
+| `near-quote-both` | 40 |
+| `near-plus` | 40 |
+| `near-plus-left` | 40 |
+| `plus-ops` | 40 |
+| `near-plus-star` | 42 |
+| `near-trail` | 33 |
+| `near-lead-star` | 35 |
+| `near-only` | 15 |
+| `near-twice` | 40 |
+| `near-hyphen-star` | 44 |
+| `near-quote-star` | 46 |
+| `near-dotted-star` | 38 |
+| `near-win-and` | 40 |
+| `near-win-bool` | 40 |
+| `near-win-and-trail` | 33 |
+| `minus-quote` | 40 |
+| `minus-group` | 40 |
+| `minus-lead-or` | 40 |
+| `minus-last` | 40 |
+| `minus-first` | 40 |
+| `minus-last-of-4` | 40 |
+| `minus-and` | 40 |
+| `stop-minus` | 36 |
+| `stop-minus-two` | 38 |
+| `cr2-or-minus` | 44 |
+| `cr2-or-minus-forms` | 44 |
+| `cr2-xor-minus` | 44 |
+| `cr2-xor-minus-forms` | 44 |
+| `cr2-and-not-minus` | 44 |
+| `cr2-and-not-minus-forms` | 48 |
+| `cr2-and-doubleminus` | 44 |
+| `cr2-and-doubleminus-forms` | 44 |
+| `tilde-minus-digit` | 40 |
+| `tilde-star-or` | 44 |
+| `tilde-digit-star` | 44 |
+| `backslash-open` | 44 |
+| `cjk-op` | 30 |
+| `cjk-phrase` | 48 |
