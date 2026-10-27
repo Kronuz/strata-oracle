@@ -7,6 +7,7 @@
 //   oracle infix                           non-word code points that do not just split words
 //   oracle termgen-xapiand TEXTS_FILE      prefixes, wdf increments, stoppers, positionless indexing
 //   oracle parse    QUERIES_FILE           one query per line -> descriptions per flag set
+//   oracle parse-v2 SPECS STOPWORD_DIR    Xapiand's parser configurations, one spec per line (gen-parse-v2.py)
 //   oracle stem     LANGUAGE WORDS_FILE    one word per line -> stem
 //   oracle languages                       the stemmer languages, one per line
 //   oracle rank     CORPUS_JSON N QUERIES  index N docs, then top-10 weights, percents, estimates
@@ -17,7 +18,10 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <memory>
 #include <random>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -277,6 +281,204 @@ int parse(const char* path) {
 	return 0;
 }
 
+// parse-v2: Xapiand's QueryParser configurations. One row per tab-separated spec line:
+//   group, query (JSON string), flags (names joined by |, "-" for none), default_op,
+//   stopper (none or a language file), stop_strategy, stem_lang (none or a language),
+//   stem (unset|none|some|all|all_z), prefix (JSON string), partial_max, partial_limit,
+//   fuzzy_max, fuzzy_limit, wildcard_max, wildcard_limit, expand (0|1)
+class ListStopper : public Xapian::Stopper {
+	std::set<std::string> words;
+
+public:
+	explicit ListStopper(const std::string& path) {
+		std::ifstream in(path);
+		for (std::string w; in >> w;) { words.insert(w); }
+	}
+	bool operator()(const std::string& term) const override { return words.count(term) != 0; }
+	std::size_t size() const { return words.size(); }
+};
+
+std::string json_unescape(const std::string& s) {
+	std::string out;
+	auto put = [&out](unsigned cp) {
+		if (cp < 0x80) { out += char(cp); }
+		else if (cp < 0x800) { out += char(0xc0 | cp >> 6); out += char(0x80 | (cp & 0x3f)); }
+		else if (cp < 0x10000) { out += char(0xe0 | cp >> 12); out += char(0x80 | (cp >> 6 & 0x3f)); out += char(0x80 | (cp & 0x3f)); }
+		else { out += char(0xf0 | cp >> 18); out += char(0x80 | (cp >> 12 & 0x3f)); out += char(0x80 | (cp >> 6 & 0x3f)); out += char(0x80 | (cp & 0x3f)); }
+	};
+	for (std::size_t i = 1; i + 1 < s.size(); ++i) {  // strip the quotes
+		if (s[i] != '\\') { out += s[i]; continue; }
+		char c = s[++i];
+		switch (c) {
+		case 'n': out += '\n'; break;
+		case 't': out += '\t'; break;
+		case 'r': out += '\r'; break;
+		case 'b': out += '\b'; break;
+		case 'f': out += '\f'; break;
+		case 'u': {
+			unsigned cp = std::stoul(s.substr(i + 1, 4), nullptr, 16);
+			i += 4;
+			if (cp >= 0xd800 && cp < 0xdc00 && s.compare(i + 1, 2, "\\u") == 0) {
+				unsigned lo = std::stoul(s.substr(i + 3, 4), nullptr, 16);
+				i += 6;
+				cp = 0x10000 + ((cp - 0xd800) << 10) + (lo - 0xdc00);
+			}
+			put(cp);
+			break;
+		}
+		default: out += c;
+		}
+	}
+	return out;
+}
+
+std::vector<std::string> split(const std::string& s, char sep) {
+	std::vector<std::string> out;
+	std::size_t i = 0;
+	for (;;) {
+		auto j = s.find(sep, i);
+		if (j == std::string::npos) { out.push_back(s.substr(i)); return out; }
+		out.push_back(s.substr(i, j - i));
+		i = j + 1;
+	}
+}
+
+// Documents for expansion: one term per document, so a matching document names its term.
+// "baa00".."baa59" has term frequency 1 + (j * 37 % 11); the rest have frequency 2.
+Xapian::WritableDatabase expansion_db() {
+	Xapian::WritableDatabase db(std::string(), Xapian::DB_BACKEND_INMEMORY);
+	auto add = [&db](const std::string& term, unsigned freq) {
+		for (unsigned k = 0; k < freq; ++k) {
+			Xapian::Document d;
+			d.add_term(term);
+			db.add_document(d);
+		}
+	};
+	for (const char* prefix : {"", "S", "title.S"}) {
+		for (unsigned j = 0; j < 60; ++j) {
+			char buf[16];
+			std::snprintf(buf, sizeof buf, "baa%02u", j);
+			add(std::string(prefix) + buf, 1 + (j * 37 % 11));
+		}
+		for (const char* w : {"ba", "bab", "bad", "ban", "banana", "bananas", "banna", "bannana", "cabana", "bandana", "barack", "obama", "obamas", "obamacare", "obamas", "oba", "ob", "ma",
+		                      "running", "runner", "runners", "run", "the", "cat", "cats", "mat", "matt", "mate", "ab", "abc", "abcd", "abcde"}) {
+			add(std::string(prefix) + w, 2);
+		}
+	}
+	db.commit();
+	return db;
+}
+
+int parse_v2(const char* path, const char* stopdir) {
+	using QP = Xapian::QueryParser;
+	const std::pair<const char*, unsigned> flag_names[] = {
+		{"boolean", QP::FLAG_BOOLEAN}, {"phrase", QP::FLAG_PHRASE}, {"lovehate", QP::FLAG_LOVEHATE},
+		{"boolean_any_case", QP::FLAG_BOOLEAN_ANY_CASE}, {"wildcard", QP::FLAG_WILDCARD}, {"pure_not", QP::FLAG_PURE_NOT},
+		{"partial", QP::FLAG_PARTIAL}, {"cjk_ngram", QP::FLAG_CJK_NGRAM}, {"word_breaks", QP::FLAG_WORD_BREAKS},
+		{"wildcard_multi", QP::FLAG_WILDCARD_MULTI}, {"wildcard_single", QP::FLAG_WILDCARD_SINGLE}, {"fuzzy", QP::FLAG_FUZZY}};
+	const std::pair<const char*, Xapian::Query::op> ops[] = {
+		{"and", Xapian::Query::OP_AND}, {"or", Xapian::Query::OP_OR}, {"near", Xapian::Query::OP_NEAR}, {"phrase", Xapian::Query::OP_PHRASE},
+		{"elite_set", Xapian::Query::OP_ELITE_SET}, {"synonym", Xapian::Query::OP_SYNONYM}, {"max", Xapian::Query::OP_MAX},
+		{"xor", Xapian::Query::OP_XOR}, {"and_not", Xapian::Query::OP_AND_NOT}};
+	const std::pair<const char*, QP::stem_strategy> strategies[] = {{"none", QP::STEM_NONE}, {"some", QP::STEM_SOME}, {"all", QP::STEM_ALL}, {"all_z", QP::STEM_ALL_Z}};
+	const std::pair<const char*, QP::stop_strategy> stop_strategies[] = {{"none", QP::STOP_NONE}, {"all", QP::STOP_ALL}, {"stemmed", QP::STOP_STEMMED}};
+	const std::pair<const char*, int> limits[] = {{"error", Xapian::Query::WILDCARD_LIMIT_ERROR}, {"first", Xapian::Query::WILDCARD_LIMIT_FIRST},
+	                                              {"most_frequent", Xapian::Query::WILDCARD_LIMIT_MOST_FREQUENT}};
+	auto limit_of = [&limits](const std::string& name) {
+		for (const auto& [n, v] : limits) { if (name == n) { return v; } }
+		return -1;
+	};
+
+	auto db = expansion_db();
+	std::map<std::string, std::unique_ptr<ListStopper>> stoppers;
+
+	std::ifstream in(path);
+	for (std::string line; std::getline(in, line);) {
+		if (line.empty()) { continue; }
+		auto f = split(line, '\t');
+		if (f.size() != 16) { std::cerr << "bad spec line: " << line << "\n"; return 1; }
+		const auto& group = f[0];
+		auto query = json_unescape(f[1]);
+		const auto& flag_text = f[2];
+		const auto& op_name = f[3];
+		const auto& stopper_name = f[4];
+		const auto& stop_strategy = f[5];
+		const auto& stem_lang = f[6];
+		const auto& stem_name = f[7];
+		auto prefix = json_unescape(f[8]);
+		auto partial_max = std::stoul(f[9]);
+		auto fuzzy_max = std::stoul(f[11]);
+		auto wildcard_max = std::stoul(f[13]);
+		bool expand = f[15] == "1";
+
+		unsigned flags = 0;
+		if (flag_text != "-") {
+			for (const auto& name : split(flag_text, '|')) {
+				bool found = false;
+				for (const auto& [n, v] : flag_names) { if (name == n) { flags |= v; found = true; } }
+				if (!found) { std::cerr << "unknown flag " << name << "\n"; return 1; }
+			}
+		}
+
+		std::string description, error, error_type, expanded;
+		try {
+			QP parser;
+			if (op_name != "unset") {
+				bool found = false;
+				for (const auto& [n, v] : ops) { if (op_name == n) { parser.set_default_op(v); found = true; } }
+				if (!found) { std::cerr << "unknown op " << op_name << "\n"; return 1; }
+			}
+			if (stopper_name != "none") {
+				auto& s = stoppers[stopper_name];
+				if (!s) { s = std::make_unique<ListStopper>(std::string(stopdir) + "/" + stopper_name + ".txt"); }
+				parser.set_stopper(s.get());
+			}
+			if (stop_strategy != "default") {
+				for (const auto& [n, v] : stop_strategies) { if (stop_strategy == n) { parser.set_stopper_strategy(v); } }
+			}
+			if (stem_lang != "none") { parser.set_stemmer(Xapian::Stem(stem_lang)); }
+			if (stem_name != "unset") {
+				for (const auto& [n, v] : strategies) { if (stem_name == n) { parser.set_stemming_strategy(v); } }
+			}
+			parser.set_max_expansion(wildcard_max, limit_of(f[14]), QP::FLAG_WILDCARD);
+			parser.set_max_expansion(partial_max, limit_of(f[10]), QP::FLAG_PARTIAL);
+			parser.set_max_expansion(fuzzy_max, limit_of(f[12]), QP::FLAG_FUZZY);
+			parser.set_database(db);
+			Xapian::Query q = parser.parse_query(query, flags, prefix);
+			description = q.get_description();
+			if (expand) {
+				try {
+					Xapian::Enquire enquire(db);
+					enquire.set_query(q);
+					auto mset = enquire.get_mset(0, db.get_doccount());
+					std::set<std::string> terms;
+					for (auto it = mset.begin(); it != mset.end(); ++it) {
+						terms.insert(*it.get_document().termlist_begin());
+					}
+					expanded = "[";
+					for (const auto& t : terms) { expanded += (expanded.size() > 1 ? "," : "") + json_string(t); }
+					expanded += "]";
+				} catch (const Xapian::Error& e) {
+					expanded = "{\"error_type\":" + json_string(e.get_type()) + ",\"error\":" + json_string(e.get_msg()) + "}";
+				}
+			}
+		} catch (const Xapian::Error& e) {
+			error = e.get_msg();
+			error_type = e.get_type();
+		}
+		std::cout << "{\"group\":" << json_string(group) << ",\"query\":" << json_string(query) << ",\"flags\":\"" << flag_text << "\",\"default_op\":\"" << op_name
+		          << "\",\"stopper\":\"" << stopper_name << "\",\"stop_strategy\":\"" << stop_strategy << "\",\"stem_lang\":\"" << stem_lang
+		          << "\",\"stem\":\"" << stem_name << "\",\"prefix\":" << json_string(prefix) << ",\"partial_max\":" << partial_max
+		          << ",\"partial_limit\":\"" << f[10] << "\",\"fuzzy_max\":" << fuzzy_max << ",\"fuzzy_limit\":\"" << f[12]
+		          << "\",\"wildcard_max\":" << wildcard_max << ",\"wildcard_limit\":\"" << f[14] << "\",\"description\":" << json_string(description)
+		          << ",\"error\":" << json_string(error);
+		if (!error.empty()) { std::cout << ",\"error_type\":" << json_string(error_type); }
+		if (expand && !expanded.empty()) { std::cout << ",\"expanded\":" << expanded; }
+		std::cout << "}\n";
+	}
+	return 0;
+}
+
 int stem(const char* language, const char* path) {
 	Xapian::Stem stemmer(language);
 	for (const auto& w : lines(path)) {
@@ -481,6 +683,7 @@ int main(int argc, char** argv) {
 	if (cmd == "infix" && argc == 2) { return infix(); }
 	if (cmd == "termgen-xapiand" && argc == 3) { return termgen_xapiand(argv[2]); }
 	if (cmd == "parse" && argc == 3) { return parse(argv[2]); }
+	if (cmd == "parse-v2" && argc == 4) { return parse_v2(argv[2], argv[3]); }
 	if (cmd == "stem" && argc == 4) { return stem(argv[2], argv[3]); }
 	if (cmd == "languages" && argc == 2) {
 		std::string all = Xapian::Stem::get_available_languages();
@@ -494,6 +697,6 @@ int main(int argc, char** argv) {
 	if (cmd == "termgen-bench" && argc == 4) { return termgen_bench(argv[2], std::stoul(argv[3])); }
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
 	if (cmd == "values" && argc == 3) { return values(std::stoul(argv[2])); }
-	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | stem LANGUAGE WORDS | rank CORPUS N QUERIES | values N\n";
+	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | parse-v2 SPECS STOPDIR | stem LANGUAGE WORDS | rank CORPUS N QUERIES | values N\n";
 	return 2;
 }
