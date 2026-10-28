@@ -158,3 +158,37 @@ bracket, a missing operand):
 | `backslash-open` | 44 |
 | `cjk-op` | 30 |
 | `cjk-phrase` | 48 |
+
+## shards
+
+`vectors/out/shards-<config>.jsonl` (six configurations, 44 queries each) records several shards
+searched as one `Xapian::Database` (`add_database` per shard, in shard order, glass backend on disk).
+Regenerate with `vectors/gen-shards.py vectors/inputs` and
+`oracle shards inputs/shards-<config>.jsonl inputs/shards-queries.txt DIR > out/shards-<config>.jsonl`
+(`DIR` holds the shards' glass directories); two runs are byte-identical.
+
+Inputs: `inputs/shards-<config>.jsonl` has `{"shards":S}` then one line per document
+(`shard`, local `did` with gaps, `key` in hex, `terms` in order). Configurations `s1`, `s2`, `s3`, `s5`,
+`s5e` (shards 0 and 3 stay empty) and `s7` (half of the documents in shard 0). Keys are short byte
+strings with many ties, some empty, some holding 0x00 and 0xff, in value slot 0.
+
+Rows: the first is the index (`docs`, `avlength`, `lastdocid`, the document-length bounds, and each
+shard's `docs` and `lastdocid`); then `termfreq` and `collfreq` for `w0` to `w39` and a term nothing has;
+then, per query (`TERM`, `OR`, `AND`, `AND_MAYBE`, `AND_NOT`, `PHRASE`) and mode, the top 25 as
+`[docid, weight]` with the match bounds at `check_at_least` 0 and at the document count (relevance
+and key modes; the others at the count only). Modes: `rel`, `rel-desc` (`set_docid_order(DESCENDING)`),
+`key` (`set_sort_by_key_then_relevance(key maker, false)`), `key-desc` and `key-rev` (`reverse` true).
+
+What the rows show for Xapian 2.1.0:
+
+- A hit's docid is `(did - 1) * shards + shard + 1`; the database's `lastdocid` is the largest of those over
+  the shards that ever gave a docid; empty shards keep their slot in the numbering.
+- Statistics are the shards' together: `docs`, `avlength` and every term's `termfreq` are sums; weights
+  are the single-database weights.
+- The document-length bounds of the glass backend are exact (the shortest and longest document of the
+  non-empty shards); empty shards do not lower them.
+- `key` sorts ascending by memcmp of the key; equal keys by weight, descending; equal weights by docid
+  (ascending, or descending under `key-desc`). `key-rev` reverses the key order only: weights still
+  descend within a key.
+- At `check_at_least` equal to the document count, `lower`, `estimated` and `upper` meet at the number of
+  matches, in every mode.

@@ -16,6 +16,8 @@
 
 #include <chrono>
 #include <cstdio>
+#include <cstring>
+#include <stdexcept>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -673,6 +675,120 @@ int values(std::size_t n) {
 	return 0;
 }
 
+// Keys are read from value slot 0 of the document: memcmp order, as Xapiand's key maker's.
+class SlotKeyMaker final : public Xapian::KeyMaker {
+public:
+	std::string operator()(const Xapian::Document& doc) const override { return doc.get_value(0); }
+};
+
+std::string unhex(const std::string& hex) {
+	std::string out;
+	for (std::size_t i = 0; i + 1 < hex.size(); i += 2) { out.push_back(char(std::stoi(hex.substr(i, 2), nullptr, 16))); }
+	return out;
+}
+
+long number_after(const std::string& line, const char* name) {
+	const std::size_t at = line.find(name);
+	return at == std::string::npos ? -1 : std::stol(line.substr(at + std::strlen(name)));
+}
+
+Xapian::Query shard_query(const std::string& q) {
+	const auto parts = split(q, ' ');
+	const std::string& op = parts[0];
+	std::vector<Xapian::Query> kids;
+	for (std::size_t i = 1; i < parts.size(); ++i) { kids.emplace_back(parts[i]); }
+	if (op == "TERM") { return kids[0]; }
+	if (op == "OR") { return Xapian::Query(Xapian::Query::OP_OR, kids.begin(), kids.end()); }
+	if (op == "AND") { return Xapian::Query(Xapian::Query::OP_AND, kids.begin(), kids.end()); }
+	if (op == "AND_MAYBE") { return Xapian::Query(Xapian::Query::OP_AND_MAYBE, kids[0], kids[1]); }
+	if (op == "AND_NOT") { return Xapian::Query(Xapian::Query::OP_AND_NOT, kids[0], kids[1]); }
+	if (op == "PHRASE") { return Xapian::Query(Xapian::Query::OP_PHRASE, kids.begin(), kids.end(), kids.size()); }
+	throw std::runtime_error("unknown query kind " + op);
+}
+
+// One corpus of documents spread over shards (gen-shards.py), searched as one Database
+// (add_database per shard, in shard order): relevance and key-then-relevance, both docid orders.
+int shards(const char* corpus, const char* queries_path, const std::string& dir) {
+	const auto docs = lines(corpus);
+	const std::size_t n = std::size_t(number_after(docs[0], "\"shards\":"));
+	std::vector<Xapian::WritableDatabase> dbs;
+	for (std::size_t s = 0; s < n; ++s) { dbs.emplace_back(dir + "/shard-" + std::to_string(s), Xapian::DB_CREATE_OR_OVERWRITE | Xapian::DB_BACKEND_GLASS); }
+	for (std::size_t i = 1; i < docs.size(); ++i) {
+		const std::string& line = docs[i];
+		Xapian::Document doc;
+		Xapian::termpos pos = 0;
+		const std::size_t ts = line.find("\"terms\":[");
+		for (std::size_t at = ts + 9; at < line.size() && line[at] != ']';) {
+			const std::size_t a = line.find('"', at), b = line.find('"', a + 1);
+			doc.add_posting(line.substr(a + 1, b - a - 1), ++pos);
+			at = b + 1 < line.size() && line[b + 1] == ',' ? b + 2 : b + 1;
+		}
+		const std::size_t k = line.find("\"key\":\"") + 7;
+		doc.add_value(0, unhex(line.substr(k, line.find('"', k) - k)));
+		dbs[std::size_t(number_after(line, "\"shard\":"))].replace_document(Xapian::docid(number_after(line, "\"did\":")), doc);
+	}
+	Xapian::Database db;
+	for (auto& d : dbs) {
+		d.commit();
+		db.add_database(d);
+	}
+	char avlength[64];
+	std::snprintf(avlength, sizeof avlength, "%.17g", db.get_avlength());
+	std::cout << "{\"index\":{\"shards\":" << n << ",\"docs\":" << db.get_doccount() << ",\"avlength\":" << avlength << ",\"lastdocid\":" << db.get_lastdocid()
+	          << ",\"lower_length\":" << db.get_doclength_lower_bound() << ",\"upper_length\":" << db.get_doclength_upper_bound() << ",\"shard_docs\":[";
+	for (std::size_t s = 0; s < n; ++s) { std::cout << (s ? "," : "") << dbs[s].get_doccount(); }
+	std::cout << "],\"shard_lastdocid\":[";
+	for (std::size_t s = 0; s < n; ++s) { std::cout << (s ? "," : "") << dbs[s].get_lastdocid(); }
+	std::cout << "]}}\n";
+	for (int w = 0; w < 41; ++w) {
+		const std::string t = w == 40 ? "nosuchterm" : "w" + std::to_string(w);
+		std::cout << "{\"term\":" << json_string(t) << ",\"termfreq\":" << db.get_termfreq(t) << ",\"collfreq\":" << db.get_collection_freq(t) << "}\n";
+	}
+	SlotKeyMaker maker;
+	struct mode {
+		const char* name;
+		bool key, reverse;
+		Xapian::Enquire::docid_order order;
+		bool both_checks;
+	};
+	const mode modes[] = {
+		{"rel", false, false, Xapian::Enquire::ASCENDING, true},
+		{"rel-desc", false, false, Xapian::Enquire::DESCENDING, false},
+		{"key", true, false, Xapian::Enquire::ASCENDING, true},
+		{"key-desc", true, false, Xapian::Enquire::DESCENDING, false},
+		{"key-rev", true, true, Xapian::Enquire::ASCENDING, false},
+	};
+	Xapian::Enquire enquire(db);
+	for (const auto& q : lines(queries_path)) {
+		const Xapian::Query query = shard_query(q);
+		for (const auto& m : modes) {
+			enquire.set_query(query);
+			enquire.set_docid_order(m.order);
+			if (m.key) {
+				enquire.set_sort_by_key_then_relevance(&maker, m.reverse);
+			} else {
+				enquire.set_sort_by_relevance();
+			}
+			std::vector<Xapian::doccount> checks = {db.get_doccount()};
+			if (m.both_checks) { checks.insert(checks.begin(), 0u); }
+			for (const Xapian::doccount check : checks) {
+				const Xapian::MSet mset = enquire.get_mset(0, 25, check);
+				std::cout << "{\"query\":" << json_string(q) << ",\"mode\":\"" << m.name << "\",\"check_at_least\":" << check << ",\"lower\":" << mset.get_matches_lower_bound()
+				          << ",\"estimated\":" << mset.get_matches_estimated() << ",\"upper\":" << mset.get_matches_upper_bound() << ",\"hits\":[";
+				bool first = true;
+				for (auto it = mset.begin(); it != mset.end(); ++it) {
+					char weight[64];
+					std::snprintf(weight, sizeof weight, "%.17g", it.get_weight());
+					std::cout << (first ? "" : ",") << "[" << *it << "," << weight << "]";
+					first = false;
+				}
+				std::cout << "]}\n";
+			}
+		}
+	}
+	return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -696,7 +812,10 @@ int main(int argc, char** argv) {
 	}
 	if (cmd == "termgen-bench" && argc == 4) { return termgen_bench(argv[2], std::stoul(argv[3])); }
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
+	if (cmd == "shards" && argc == 5) {
+		try { return shards(argv[2], argv[3], argv[4]); } catch (const Xapian::Error& e) { std::cerr << e.get_description() << "\n"; return 1; }
+	}
 	if (cmd == "values" && argc == 3) { return values(std::stoul(argv[2])); }
-	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | parse-v2 SPECS STOPDIR | stem LANGUAGE WORDS | rank CORPUS N QUERIES | values N\n";
+	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | parse-v2 SPECS STOPDIR | stem LANGUAGE WORDS | rank CORPUS N QUERIES | shards CORPUS QUERIES DIR | values N\n";
 	return 2;
 }
