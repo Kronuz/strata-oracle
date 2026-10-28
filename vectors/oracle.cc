@@ -11,6 +11,7 @@
 //   oracle stem     LANGUAGE WORDS_FILE    one word per line -> stem
 //   oracle languages                       the stemmer languages, one per line
 //   oracle rank     CORPUS_JSON N QUERIES  index N docs, then top-10 weights, percents, estimates
+//   oracle rank-terms TERMS QUERIES        a terms dump as documents, then top-10 weights and exact counts (fields T3b)
 //   oracle termgen-bench CORPUS_JSON N     TermGenerator throughput into Xapian::Document
 #include <xapian.h>
 
@@ -21,6 +22,7 @@
 #include <map>
 #include <memory>
 #include <random>
+#include <sstream>
 #include <set>
 #include <string>
 #include <vector>
@@ -533,6 +535,67 @@ int rank(const char* corpus, std::size_t n, const char* queries_path) {
 	return 0;
 }
 
+// Fields-and-keys T3b: documents from a terms dump (xapiand_terms.py's "doc<TAB>wdf<TAB>hex" lines,
+// one document per distinct doc id, in order of first appearance, every term with its wdf, the key
+// and version terms too), then the top-10 weights and exact counts of the queries ("KIND<TAB>hex
+// hex ...", KIND TERM, OR or AND, each hex a whole term).
+int rank_terms(const char* terms_path, const char* queries_path) {
+	auto unhex = [](const std::string& h) {
+		std::string out;
+		auto nibble = [](char c) { return c <= '9' ? c - '0' : c - 'a' + 10; };
+		for (std::size_t i = 0; i + 1 < h.size(); i += 2) { out.push_back(char(nibble(h[i]) << 4 | nibble(h[i + 1]))); }
+		return out;
+	};
+	Xapian::WritableDatabase db(std::string(), Xapian::DB_BACKEND_INMEMORY);
+	{
+		std::ifstream in(terms_path);
+		std::string line, current;
+		Xapian::Document doc;
+		bool open = false;
+		auto flush = [&] {
+			if (open) { db.add_document(doc); }
+			doc = Xapian::Document();
+			open = false;
+		};
+		while (std::getline(in, line)) {
+			const auto a = line.find('\t'), b = line.find('\t', a + 1);
+			if (b == std::string::npos) { continue; }
+			const std::string id = line.substr(0, a);
+			if (id != current) {
+				flush();
+				current = id;
+			}
+			open = true;
+			doc.add_term(unhex(line.substr(b + 1)), Xapian::termcount(std::stoul(line.substr(a + 1, b - a - 1))));
+		}
+		flush();
+		db.commit();
+	}
+	std::cout << "{\"index\":{\"docs\":" << db.get_doccount() << ",\"avlength\":" << db.get_avlength() << "}}\n";
+	Xapian::Enquire enquire(db);
+	for (const auto& q : lines(queries_path)) {
+		const auto tab = q.find('\t');
+		const std::string kind = q.substr(0, tab);
+		std::vector<Xapian::Query> parts;
+		std::istringstream ss(q.substr(tab + 1));
+		for (std::string h; ss >> h;) { parts.emplace_back(unhex(h)); }
+		Xapian::Query query = parts.size() == 1 ? parts[0] : Xapian::Query(kind == "AND" ? Xapian::Query::OP_AND : Xapian::Query::OP_OR, parts.begin(), parts.end());
+		enquire.set_query(query);
+		Xapian::MSet mset = enquire.get_mset(0, 10, db.get_doccount());
+		std::cout << "{\"query\":" << json_string(q) << ",\"check_at_least\":" << db.get_doccount() << ",\"lower\":" << mset.get_matches_lower_bound()
+		          << ",\"upper\":" << mset.get_matches_upper_bound() << ",\"hits\":[";
+		bool first = true;
+		for (auto m = mset.begin(); m != mset.end(); ++m) {
+			char weight[64];
+			std::snprintf(weight, sizeof weight, "%.17g", m.get_weight());
+			std::cout << (first ? "" : ",") << "[" << *m << "," << weight << "," << m.get_percent() << "]";
+			first = false;
+		}
+		std::cout << "]}\n";
+	}
+	return 0;
+}
+
 int termgen_bench(const char* corpus, std::size_t n) {
 	std::vector<std::string> docs;
 	std::size_t bytes = 0;
@@ -695,6 +758,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 	if (cmd == "termgen-bench" && argc == 4) { return termgen_bench(argv[2], std::stoul(argv[3])); }
+	if (cmd == "rank-terms" && argc == 4) { return rank_terms(argv[2], argv[3]); }
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
 	if (cmd == "values" && argc == 3) { return values(std::stoul(argv[2])); }
 	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | parse-v2 SPECS STOPDIR | stem LANGUAGE WORDS | rank CORPUS N QUERIES | values N\n";
