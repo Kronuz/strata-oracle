@@ -12,6 +12,7 @@
 //   oracle languages                       the stemmer languages, one per line
 //   oracle rank     CORPUS_JSON N QUERIES  index N docs, then top-10 weights, percents, estimates
 //   oracle termgen-bench CORPUS_JSON N     TermGenerator throughput into Xapian::Document
+//   oracle ops      CORPUS QUERIES         operator queries (gen-ops.py) over a seeded corpus: top-50 weights and counts
 #include <xapian.h>
 
 #include <chrono>
@@ -22,6 +23,7 @@
 #include <memory>
 #include <random>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -673,6 +675,97 @@ int values(std::size_t n) {
 	return 0;
 }
 
+// Operator vectors: the corpus is plain term lists in position order (gen-ops.py), the queries
+// s-expressions (see its header). Each query runs at check_at_least 0 and at the document count.
+struct sexp_reader {
+	const std::string& s;
+	std::size_t i = 0;
+	explicit sexp_reader(const std::string& text) : s(text) {}
+	void blank() { while (i < s.size() && s[i] == ' ') { ++i; } }
+	std::string word() {
+		blank();
+		const std::size_t a = i;
+		while (i < s.size() && s[i] != ' ' && s[i] != ')' && s[i] != '(') { ++i; }
+		return s.substr(a, i - a);
+	}
+	Xapian::Query parse() {
+		blank();
+		if (s[i] != '(') {
+			std::string w = word();
+			unsigned wqf = 1;
+			if (auto at = w.find('*'); at != std::string::npos) { wqf = unsigned(std::stoul(w.substr(at + 1))); w.resize(at); }
+			return Xapian::Query(w, wqf);
+		}
+		++i;
+		const std::string op = word();
+		double number = 0;
+		unsigned param = 0;
+		if (op == "SCALE" || op == "SCALEN") { number = std::stod(word()); }
+		if (op == "ELITE_SET") { param = unsigned(std::stoul(word())); }
+		std::vector<Xapian::Query> kids;
+		for (blank(); s[i] != ')'; blank()) { kids.push_back(parse()); }
+		++i;
+		using Q = Xapian::Query;
+		if (op == "SCALE") { return Q(Q::OP_SCALE_WEIGHT, kids.at(0), number); }
+		if (op == "SCALEN") { return Q(Q::OP_SCALE_WEIGHT, kids.begin(), kids.end(), 0); }
+		if (op == "PHRASE") { return Q(Q::OP_PHRASE, kids.begin() + 1, kids.end(), 2); }
+		Q::op o = op == "AND" ? Q::OP_AND : op == "OR" ? Q::OP_OR : op == "AND_NOT" ? Q::OP_AND_NOT : op == "XOR" ? Q::OP_XOR
+			: op == "AND_MAYBE" ? Q::OP_AND_MAYBE : op == "FILTER" ? Q::OP_FILTER : op == "SYNONYM" ? Q::OP_SYNONYM
+			: op == "MAX" ? Q::OP_MAX : op == "ELITE_SET" ? Q::OP_ELITE_SET : throw std::runtime_error("unknown operator " + op);
+		return Q(o, kids.begin(), kids.end(), param);
+	}
+};
+
+int ops(const char* corpus, const char* queries_path) {
+	Xapian::WritableDatabase db(std::string(), Xapian::DB_BACKEND_INMEMORY);
+	for (const auto& line : lines(corpus)) {
+		Xapian::Document doc;
+		Xapian::termpos pos = 0;
+		std::size_t at = line.find("\"terms\":[");
+		for (at = at == std::string::npos ? line.size() : at + 9; at < line.size() && line[at] != ']';) {
+			const std::size_t a = line.find('"', at), b = line.find('"', a + 1);
+			doc.add_posting(line.substr(a + 1, b - a - 1), ++pos);
+			at = b + 1 < line.size() && line[b + 1] == ',' ? b + 2 : b + 1;
+		}
+		db.add_document(doc);
+	}
+	db.commit();
+	std::cout << "{\"index\":{\"docs\":" << db.get_doccount() << ",\"avlength\":" << db.get_avlength() << "}}\n";
+	Xapian::Enquire enquire(db);
+	for (const auto& q : lines(queries_path)) {
+		for (Xapian::doccount check : {0u, db.get_doccount()}) {
+			std::string description, error, error_type, hits = "[";
+			Xapian::MSet mset;
+			try {
+				sexp_reader reader(q);
+				Xapian::Query query = reader.parse();
+				description = query.get_description();
+				enquire.set_query(query);
+				mset = enquire.get_mset(0, 50, check);
+				bool first = true;
+				for (auto m = mset.begin(); m != mset.end(); ++m) {
+					char weight[64];
+					std::snprintf(weight, sizeof weight, "%.17g", m.get_weight());
+					hits += (first ? "" : ",") + std::string("[") + std::to_string(*m) + "," + weight + "," + std::to_string(m.get_percent()) + "]";
+					first = false;
+				}
+			} catch (const Xapian::Error& e) {
+				error = e.get_msg();
+				error_type = e.get_type();
+			}
+			std::cout << "{\"query\":" << json_string(q) << ",\"description\":" << json_string(description) << ",\"check_at_least\":" << check;
+			if (error.empty()) {
+				std::cout << ",\"lower\":" << mset.get_matches_lower_bound() << ",\"estimated\":" << mset.get_matches_estimated()
+				          << ",\"upper\":" << mset.get_matches_upper_bound() << ",\"hits\":" << hits << "]";
+			} else {
+				std::cout << ",\"error\":" << json_string(error) << ",\"error_type\":" << json_string(error_type);
+			}
+			std::cout << "}\n";
+		}
+	}
+	return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -697,6 +790,7 @@ int main(int argc, char** argv) {
 	if (cmd == "termgen-bench" && argc == 4) { return termgen_bench(argv[2], std::stoul(argv[3])); }
 	if (cmd == "rank" && argc == 5) { return rank(argv[2], std::stoul(argv[3]), argv[4]); }
 	if (cmd == "values" && argc == 3) { return values(std::stoul(argv[2])); }
-	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | parse-v2 SPECS STOPDIR | stem LANGUAGE WORDS | rank CORPUS N QUERIES | values N\n";
+	if (cmd == "ops" && argc == 4) { return ops(argv[2], argv[3]); }
+	std::cerr << "usage: oracle termgen TEXTS | parse QUERIES | parse-v2 SPECS STOPDIR | stem LANGUAGE WORDS | rank CORPUS N QUERIES | values N | ops CORPUS QUERIES\n";
 	return 2;
 }

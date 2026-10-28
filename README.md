@@ -158,3 +158,30 @@ bracket, a missing operand):
 | `backslash-open` | 44 |
 | `cjk-op` | 30 |
 | `cjk-phrase` | 48 |
+
+## ops
+
+`vectors/out/ops.jsonl` (1,423 rows) records the operators Xapiand's query language emits beyond AND and OR:
+SYNONYM, MAX, XOR, SCALE_WEIGHT, ELITE_SET, and FILTER beside AND with a zero scale. The corpus is 600 seeded
+documents as term lists in position order (`inputs/ops-corpus.jsonl`) and the queries are 711 s-expressions
+(`inputs/ops-queries.txt`; the grammar is in the header of `gen-ops.py`). Regenerate with
+`vectors/gen-ops.py vectors/inputs` and `oracle ops inputs/ops-corpus.jsonl inputs/ops-queries.txt > out/ops.jsonl`;
+two runs are byte-identical. Each query runs at `check_at_least` 0 and at the document count, with the top 50
+(docid, weight to 17 digits, percent) and the three match bounds; a construction or match error is recorded as
+`error` and `error_type`.
+
+What the rows show for Xapian 2.1.0:
+
+- SYNONYM over terms weighs one term: wdf is the terms' wdfs summed and capped at the document length, df is
+  `round(N (1 - prod(1 - df_i / N)))` (one term keeps its own df), and the query's own wqf is 1 whatever the
+  children's wqf. Over a non-term child (AND, PHRASE) the weights follow no term formula; those rows are recorded,
+  not explained.
+- MAX scores the best matching child. XOR matches an odd number of children and scores their sum; a nested XOR is
+  flattened (`(XOR (XOR a b) c)` scores a document in all three as the sum of three).
+- SCALE_WEIGHT multiplies; a factor of zero keeps the matches at weight 0; a negative factor raises
+  `InvalidArgumentError`. Through the n-ary constructor (a list of subqueries, how Xapiand's DSL builds every
+  operator) it raises `InvalidArgumentError: op not valid with a list of subqueries`.
+- ELITE_SET keeps the `n` subqueries with the highest term weight (idf times the wqf factor; a term the
+  database lacks ranks last) and ORs them; `n` of 0 is 10; `n` at or above the count keeps all. Among equal
+  weights it picks none by order (rows with tied dfs are in the file). For non-term children the choice follows
+  no simple rule over the leaf weights.
