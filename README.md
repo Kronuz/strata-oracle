@@ -5,7 +5,7 @@ with it. It holds the Xapian baseline engine for the search-benchmark-game proto
 and, later, the programs that record Xapian behavior as test vectors for strata's
 clean-room compatibility work.
 
-Everything here links Xapian (GPL-2.0-or-later) and is licensed accordingly.
+Everything here links Xapian and is licensed GPL-2.0-or-later, as Xapian is; see `COPYING`.
 
 ## Vectors
 
